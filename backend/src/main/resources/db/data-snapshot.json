@@ -1,0 +1,474 @@
+{
+  "exportedAt": "2026-06-20T12:37:50.865Z",
+  "products": [
+    {
+      "product": {
+        "id": 1,
+        "name": "노트북",
+        "category": "전자기기",
+        "price": 1200000,
+        "stock": 15
+      },
+      "models": [
+        {
+          "id": 1,
+          "modelName": "MacBook Pro 14",
+          "modelCode": "NB-001",
+          "price": 2390000,
+          "stock": 8,
+          "productId": 1
+        },
+        {
+          "id": 3,
+          "modelName": "Galaxy Book4 Pro",
+          "modelCode": "NB-002",
+          "price": 1890000,
+          "stock": 12,
+          "productId": 1
+        },
+        {
+          "id": 5,
+          "modelName": "LG gram 16",
+          "modelCode": "NB-003",
+          "price": 1650000,
+          "stock": 10,
+          "productId": 1
+        },
+        {
+          "id": 7,
+          "modelName": "Dell XPS 15",
+          "modelCode": "NB-004",
+          "price": 2100000,
+          "stock": 6,
+          "productId": 1
+        },
+        {
+          "id": 9,
+          "modelName": "ASUS ZenBook 14",
+          "modelCode": "NB-005",
+          "price": 1290000,
+          "stock": 15,
+          "productId": 1
+        }
+      ]
+    },
+    {
+      "product": {
+        "id": 2,
+        "name": "무선 마우스",
+        "category": "전자기기",
+        "price": 35000,
+        "stock": 80
+      },
+      "models": [
+        {
+          "id": 11,
+          "modelName": "MX Master 3S",
+          "modelCode": "MS-001",
+          "price": 129000,
+          "stock": 25,
+          "productId": 2
+        },
+        {
+          "id": 12,
+          "modelName": "G304 Lightspeed",
+          "modelCode": "MS-002",
+          "price": 59000,
+          "stock": 40,
+          "productId": 2
+        },
+        {
+          "id": 13,
+          "modelName": "Signature M650",
+          "modelCode": "MS-003",
+          "price": 49000,
+          "stock": 30,
+          "productId": 2
+        },
+        {
+          "id": 14,
+          "modelName": "Arc Mouse",
+          "modelCode": "MS-004",
+          "price": 89000,
+          "stock": 18,
+          "productId": 2
+        },
+        {
+          "id": 15,
+          "modelName": "Pebble M350",
+          "modelCode": "MS-005",
+          "price": 29000,
+          "stock": 50,
+          "productId": 2
+        }
+      ]
+    },
+    {
+      "product": {
+        "id": 3,
+        "name": "기계식 키보드",
+        "category": "전자기기",
+        "price": 89000,
+        "stock": 42
+      },
+      "models": [
+        {
+          "id": 16,
+          "modelName": "Keychron K2 Pro",
+          "modelCode": "KB-001",
+          "price": 139000,
+          "stock": 20,
+          "productId": 3
+        },
+        {
+          "id": 17,
+          "modelName": "HHKB Professional",
+          "modelCode": "KB-002",
+          "price": 320000,
+          "stock": 8,
+          "productId": 3
+        },
+        {
+          "id": 18,
+          "modelName": "Razer BlackWidow V4",
+          "modelCode": "KB-003",
+          "price": 189000,
+          "stock": 14,
+          "productId": 3
+        },
+        {
+          "id": 19,
+          "modelName": "Logitech G Pro X",
+          "modelCode": "KB-004",
+          "price": 159000,
+          "stock": 16,
+          "productId": 3
+        },
+        {
+          "id": 20,
+          "modelName": "Corsair K70 RGB",
+          "modelCode": "KB-005",
+          "price": 175000,
+          "stock": 12,
+          "productId": 3
+        },
+        {
+          "id": 33,
+          "modelName": "Keychron K2",
+          "modelCode": "KB-001",
+          "price": 99000,
+          "stock": 20,
+          "productId": 3
+        },
+        {
+          "id": 34,
+          "modelName": "Logitech G Pro",
+          "modelCode": "KB-003",
+          "price": 159000,
+          "stock": 15,
+          "productId": 3
+        },
+        {
+          "id": 35,
+          "modelName": "Corsair K70",
+          "modelCode": "KB-004",
+          "price": 189000,
+          "stock": 12,
+          "productId": 3
+        },
+        {
+          "id": 36,
+          "modelName": "Razer BlackWidow",
+          "modelCode": "KB-005",
+          "price": 139000,
+          "stock": 18,
+          "productId": 3
+        }
+      ]
+    },
+    {
+      "product": {
+        "id": 4,
+        "name": "책상",
+        "category": "가구",
+        "price": 150000,
+        "stock": 10
+      },
+      "models": [
+        {
+          "id": 21,
+          "modelName": "IKEA BEKANT 160",
+          "modelCode": "DK-001",
+          "price": 249000,
+          "stock": 7,
+          "productId": 4
+        },
+        {
+          "id": 22,
+          "modelName": "듀오데일 L형 1200",
+          "modelCode": "DK-002",
+          "price": 189000,
+          "stock": 9,
+          "productId": 4
+        },
+        {
+          "id": 23,
+          "modelName": "모션데스크 전동 1400",
+          "modelCode": "DK-003",
+          "price": 459000,
+          "stock": 5,
+          "productId": 4
+        },
+        {
+          "id": 24,
+          "modelName": "소형 책상 800",
+          "modelCode": "DK-004",
+          "price": 89000,
+          "stock": 14,
+          "productId": 4
+        },
+        {
+          "id": 25,
+          "modelName": "사무용 책상 1200",
+          "modelCode": "DK-005",
+          "price": 129000,
+          "stock": 11,
+          "productId": 4
+        },
+        {
+          "id": 37,
+          "modelName": "Standing Desk Pro",
+          "modelCode": "DK-001",
+          "price": 450000,
+          "stock": 8,
+          "productId": 4
+        },
+        {
+          "id": 38,
+          "modelName": "Compact Desk",
+          "modelCode": "DK-002",
+          "price": 120000,
+          "stock": 15,
+          "productId": 4
+        },
+        {
+          "id": 39,
+          "modelName": "L-Shape Desk",
+          "modelCode": "DK-003",
+          "price": 280000,
+          "stock": 6,
+          "productId": 4
+        },
+        {
+          "id": 40,
+          "modelName": "Gaming Desk",
+          "modelCode": "DK-004",
+          "price": 199000,
+          "stock": 10,
+          "productId": 4
+        },
+        {
+          "id": 41,
+          "modelName": "Office Desk Basic",
+          "modelCode": "DK-005",
+          "price": 89000,
+          "stock": 20,
+          "productId": 4
+        }
+      ]
+    },
+    {
+      "product": {
+        "id": 5,
+        "name": "의자",
+        "category": "가구",
+        "price": 95000,
+        "stock": 25
+      },
+      "models": [
+        {
+          "id": 26,
+          "modelName": "Herman Miller Aeron",
+          "modelCode": "CH-001",
+          "price": 1890000,
+          "stock": 4,
+          "productId": 5
+        },
+        {
+          "id": 27,
+          "modelName": "Steelcase Leap V2",
+          "modelCode": "CH-002",
+          "price": 1450000,
+          "stock": 6,
+          "productId": 5
+        },
+        {
+          "id": 28,
+          "modelName": "DXRacer Formula",
+          "modelCode": "CH-003",
+          "price": 389000,
+          "stock": 10,
+          "productId": 5
+        },
+        {
+          "id": 29,
+          "modelName": "IKEA MARKUS",
+          "modelCode": "CH-004",
+          "price": 229000,
+          "stock": 15,
+          "productId": 5
+        },
+        {
+          "id": 30,
+          "modelName": "Secretlab TITAN Evo",
+          "modelCode": "CH-005",
+          "price": 649000,
+          "stock": 8,
+          "productId": 5
+        },
+        {
+          "id": 42,
+          "modelName": "Ergo Chair Plus",
+          "modelCode": "CH-001",
+          "price": 350000,
+          "stock": 10,
+          "productId": 5
+        },
+        {
+          "id": 43,
+          "modelName": "Mesh Office Chair",
+          "modelCode": "CH-002",
+          "price": 89000,
+          "stock": 25,
+          "productId": 5
+        },
+        {
+          "id": 44,
+          "modelName": "Gaming Chair X",
+          "modelCode": "CH-003",
+          "price": 220000,
+          "stock": 8,
+          "productId": 5
+        },
+        {
+          "id": 45,
+          "modelName": "Executive Leather",
+          "modelCode": "CH-004",
+          "price": 450000,
+          "stock": 5,
+          "productId": 5
+        },
+        {
+          "id": 46,
+          "modelName": "Student Chair",
+          "modelCode": "CH-005",
+          "price": 45000,
+          "stock": 30,
+          "productId": 5
+        }
+      ]
+    },
+    {
+      "product": {
+        "id": 6,
+        "name": "노트북",
+        "category": "",
+        "price": 0,
+        "stock": 0
+      },
+      "models": [
+        {
+          "id": 2,
+          "modelName": "MacBook Pro 14",
+          "modelCode": "NB-001",
+          "price": 2390000,
+          "stock": 8,
+          "productId": 6
+        },
+        {
+          "id": 4,
+          "modelName": "Galaxy Book4 Pro",
+          "modelCode": "NB-002",
+          "price": 1890000,
+          "stock": 12,
+          "productId": 6
+        },
+        {
+          "id": 6,
+          "modelName": "LG gram 16",
+          "modelCode": "NB-003",
+          "price": 1650000,
+          "stock": 10,
+          "productId": 6
+        },
+        {
+          "id": 8,
+          "modelName": "Dell XPS 15",
+          "modelCode": "NB-004",
+          "price": 2100000,
+          "stock": 6,
+          "productId": 6
+        },
+        {
+          "id": 10,
+          "modelName": "ASUS ZenBook 14",
+          "modelCode": "NB-005",
+          "price": 1290000,
+          "stock": 15,
+          "productId": 6
+        }
+      ]
+    },
+    {
+      "product": {
+        "id": 33,
+        "name": "",
+        "category": "",
+        "price": 0,
+        "stock": 0
+      },
+      "models": [
+        {
+          "id": 47,
+          "modelName": " 품목 1",
+          "modelCode": "P33-01",
+          "price": 1000,
+          "stock": 6,
+          "productId": 33
+        },
+        {
+          "id": 48,
+          "modelName": " 품목 2",
+          "modelCode": "P33-02",
+          "price": 2000,
+          "stock": 7,
+          "productId": 33
+        },
+        {
+          "id": 49,
+          "modelName": " 품목 3",
+          "modelCode": "P33-03",
+          "price": 3000,
+          "stock": 8,
+          "productId": 33
+        },
+        {
+          "id": 50,
+          "modelName": " 품목 4",
+          "modelCode": "P33-04",
+          "price": 4000,
+          "stock": 9,
+          "productId": 33
+        },
+        {
+          "id": 51,
+          "modelName": " 품목 5",
+          "modelCode": "P33-05",
+          "price": 5000,
+          "stock": 10,
+          "productId": 33
+        }
+      ]
+    }
+  ]
+}
