@@ -1,0 +1,6 @@
+data/
+backend/data/
+*.class
+target/
+node_modules/
+dist/

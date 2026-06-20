@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: demo-backend
+  profiles:
+    default: h2
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:db/data.sql, classpath:db/data-models.sql
+
+server:
+  port: 8080
