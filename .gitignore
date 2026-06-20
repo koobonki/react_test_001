@@ -1,9 +1,21 @@
-data/
-backend/data/
+# OS / IDE (개인 설정만 제외)
+backend/.idea/workspace.xml
+backend/.idea/usage.statistics.xml
+backend/.idea/shelf/
+backend/.idea/httpRequests/
+backend/.idea/queries/
+backend/.idea/dataSources/
+backend/.idea/dataSources.local.xml
+
+# Build / deps
 *.class
 target/
 node_modules/
 dist/
 backend/build/
 backend/.gradle/
-backend/.idea/
+
+# H2 DB — demo-db.mv.db 는 Git에 포함 (pull 후 바로 사용)
+backend/data/*.trace.db
+backend/data/*.lock.db
+backend/data/*.tmp

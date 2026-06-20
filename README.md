@@ -6,40 +6,63 @@
 
 ---
 
+## Git clone 후 바로 실행 (IntelliJ + VS Code)
+
+### 1. Clone
+
+```powershell
+git clone https://github.com/koobonki/react_test_001.git
+cd react_test_001
+```
+
+### 2. Backend — IntelliJ IDEA
+
+1. IntelliJ → **Open** → `backend` 폴더
+2. JDK **17** 설정 (File → Project Structure → SDK)
+3. Gradle import 완료 후 **DemoApplication** Run ▶
+4. API 확인: http://localhost:8081/api/products
+
+→ 자세히: [backend/README.md](./backend/README.md)
+
+**DB:** `backend/data/demo-db.mv.db` 가 Git에 포함되어 있어 pull 후 **별도 DB 설정 없이** 바로 연결됩니다.
+
+### 3. Frontend — Visual Studio Code
+
+1. VS Code → **Open Folder** → `frontend` 폴더
+2. 터미inal: `npm install` → `npm run dev`
+3. UI: http://localhost:5173
+
+→ 자세히: [frontend/README.md](./frontend/README.md)
+
+| IDE | 폴더 | 실행 |
+|-----|------|------|
+| **IntelliJ** | `backend/` | Run **DemoApplication** |
+| **VS Code** | `frontend/` | `npm run dev` |
+
+---
+
 ## 기술 스택
 
 | 구분 | 기술 | 포트 |
 |------|------|------|
 | **Frontend** | React 18, TypeScript, Vite, AG Grid | **5173** |
 | **Backend** | Spring Boot 3.2, Spring Data JPA, Gradle, Java 17 | **8081** |
-| **DB** | H2 파일 DB (`backend/data/demo-db.mv.db`) | 내장 |
+| **DB** | H2 파일 DB (`backend/data/demo-db.mv.db`, Git 포함) | 내장 |
 
 ---
 
-## 실행 방법
-
-### 1. Backend
+## CLI 실행 (IDE 없이)
 
 ```powershell
+# Backend
 cd backend
 .\gradlew.bat bootRun
-```
 
-- API: http://localhost:8081/api/products
-- H2 Console: http://localhost:8081/h2-console
-  - JDBC URL: `jdbc:h2:file:./data/demo-db`
-  - Username: `sa` / Password: (비워두기)
-
-### 2. Frontend
-
-```powershell
+# Frontend (새 터미널)
 cd frontend
 npm install
 npm run dev
 ```
-
-- UI: http://localhost:5173
-- `/api` 요청은 Vite 프록시가 Backend(8081)로 전달합니다.
 
 ---
 
@@ -47,11 +70,9 @@ npm run dev
 
 1. **카테고리 Tab** — 전체 / 전자기기 / 가구 필터
 2. **상품 카드** — 아이콘 카드 클릭 → 상품 선택 + CRUD 폼
-3. **상품 CRUD** — POST/PUT/DELETE REST API 연동
-4. **품목 CRUD** — 상품 선택 후 품목 등록·수정·삭제
-5. **AG Grid** — 화면 시작 시 전체 품목 표시 (최하단)
-6. **Modal** — Grid 행 클릭 → 품목 상세
-7. **토글 필터** — 상품재고 / 재고 10개 이상
+3. **상품/품목 CRUD** — REST API 연동
+4. **AG Grid** — 화면 시작 시 전체 품목 표시 (최하단)
+5. **Modal** — Grid 행 클릭 → 품목 상세
 
 ---
 
@@ -65,7 +86,7 @@ npm run dev
 | GET | `/api/products/{id}` | 단건 조회 |
 | POST | `/api/products` | 등록 |
 | PUT | `/api/products/{id}` | 수정 |
-| DELETE | `/api/products/{id}` | 삭제 (연결 품목 포함) |
+| DELETE | `/api/products/{id}` | 삭제 |
 
 ### 품목 `/api/products/{productId}/models`
 
@@ -79,42 +100,31 @@ npm run dev
 
 ---
 
-## 초기 데이터
+## DB 데이터
 
-| 데이터 | 개수 | 파일 |
-|--------|------|------|
-| 상품 | 5건 | `backend/src/main/resources/db/data.sql` |
-| 품목 | 25건 (상품당 5개) | `backend/src/main/resources/db/data-models.sql` |
-
-Backend 시작 시 `ProductModelDataInitializer`가 품목이 5개 미만인 상품에 자동 보충합니다.
-
----
-
-## 로컬 DB (H2)
-
-| 항목 | 값 |
-|------|-----|
-| DB 파일 | `backend/data/demo-db.mv.db` |
-| 장점 | 별도 설치 없음, Spring Boot 기본 지원 |
-| 초기화 | DB 파일 삭제 후 Backend 재시작 |
+| 파일 | 설명 |
+|------|------|
+| `backend/data/demo-db.mv.db` | **실제 H2 DB** (Git 포함, pull 후 즉시 사용) |
+| `backend/src/main/resources/db/data-snapshot.sql` | SQL 백업/복원용 |
+| `backend/src/main/resources/db/data-snapshot.json` | JSON 스냅샷 |
+| `backend/scripts/export-db-snapshot.mjs` | 실행 중 DB → 스냅샷 export |
 
 ---
 
 ## 사전 요구사항
 
-- Java 17+
-- Node.js 18+
+- Java 17+ (Backend / IntelliJ)
+- Node.js 18+ (Frontend / VS Code)
+- IntelliJ IDEA, Visual Studio Code
 
 ---
 
-## 프로젝트 구조 (요약)
+## 프로젝트 구조
 
 ```
-(test)20260619_react/
-├── README.md
-├── PROJECT_GUIDE.md
-├── PROJECT_STRUCTURE.md
-├── FRONTEND_STRUCTURE.md
-├── backend/          Spring Boot REST API
-└── frontend/         React SPA
+react_test_001/
+├── backend/          Spring Boot + H2 DB (IntelliJ)
+├── frontend/         React + Vite (VS Code)
+├── react-demo.code-workspace
+└── README.md
 ```

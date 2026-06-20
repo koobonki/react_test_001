@@ -24,9 +24,9 @@ spring:
         format_sql: true
   sql:
     init:
-      mode: always
-      # 앱 시작 시 상품·품목 시드 SQL 실행
-      data-locations: classpath:db/data.sql, classpath:db/data-models.sql
+      # H2 파일(demo-db.mv.db)을 Git으로 공유하므로 시드 SQL은 자동 실행하지 않음
+      # 초기화 필요 시: db/data-snapshot.sql 참고
+      mode: never
 
 server:
   port: 8081  # Frontend vite proxy target
