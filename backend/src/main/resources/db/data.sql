@@ -1,4 +1,7 @@
--- 초기 샘플 데이터 (테이블이 비어 있을 때만 삽입)
+-- 상품(products) 초기 시드 데이터 — 5건
+-- WHERE NOT EXISTS: 이미 DB에 데이터가 있으면 중복 삽입하지 않음
+-- Frontend Tab: 전자기기 3건, 가구 2건
+
 INSERT INTO products (name, category, price, stock)
 SELECT '노트북', '전자기기', 1200000, 15
 WHERE NOT EXISTS (SELECT 1 FROM products);

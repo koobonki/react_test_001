@@ -11,8 +11,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
- * 상품 모델 Entity — DB의 product_models 테이블과 매핑됩니다.
- * 하나의 상품(Product)에 여러 모델(ProductModel)이 연결됩니다. (N:1)
+ * 품목(ProductModel) 엔티티 — DB 테이블 {@code product_models}.
+ *
+ * <p>하나의 상품(Product) 아래 여러 품목(모델/SKU)이 존재하는 1:N 관계입니다.
+ * 예: 상품 "노트북" → 품목 "MacBook Pro 14", "Galaxy Book4 Pro" …</p>
  */
 @Entity
 @Table(name = "product_models")
@@ -22,15 +24,26 @@ public class ProductModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** 어떤 상품에 속하는 모델인지 연결. product_id 컬럼으로 저장됩니다. */
+    /**
+     * 이 품목이 속한 상품.
+     * {@code @ManyToOne}: 품목 여러 개 → 상품 1개.
+     * {@code @JsonIgnore}: JSON 응답에 Product 전체 객체는 넣지 않음 (순환 참조 방지).
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
-    @JsonIgnore // JSON 응답에 product 객체 전체를 넣지 않음 (순환 참조 방지)
+    @JsonIgnore
     private Product product;
 
+    /** 품목명 (예: MacBook Pro 14) */
     private String modelName;
+
+    /** 품목 코드 (예: NB-001) */
     private String modelCode;
+
+    /** 품목 가격 */
     private Integer price;
+
+    /** 품목 재고 */
     private Integer stock;
 
     public ProductModel() {
@@ -60,7 +73,9 @@ public class ProductModel {
         this.product = product;
     }
 
-    /** JSON 응답에서 productId를 내려주기 위한 getter */
+    /**
+     * Frontend에서 어느 상품의 품목인지 알 수 있도록 productId만 JSON으로 내려줍니다.
+     */
     public Long getProductId() {
         return product != null ? product.getId() : null;
     }

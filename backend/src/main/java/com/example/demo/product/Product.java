@@ -7,28 +7,37 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * 상품 Entity — DB의 products 테이블과 1:1로 매핑됩니다.
- * JPA가 이 클래스를 보고 테이블/컬럼을 자동으로 생성·관리합니다.
+ * 상품(Product) 엔티티 — DB 테이블 {@code products}와 1:1로 매핑됩니다.
+ *
+ * <p>JPA Entity: Java 클래스 필드가 DB 컬럼과 연결됩니다.
+ * Controller → Repository → Entity 순으로 데이터가 저장/조회됩니다.</p>
  */
 @Entity
 @Table(name = "products")
 public class Product {
 
-    /** PK. DB가 자동으로 번호를 증가(1, 2, 3...)시킵니다. */
+    /** PK. DB가 자동 증가(IDENTITY) 방식으로 번호를 부여합니다. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** 상품명 (예: 노트북) */
     private String name;
+
+    /** 카테고리 (예: 전자기기, 가구) — Frontend Tab 필터에 사용 */
     private String category;
+
+    /** 판매 가격 (원) */
     private Integer price;
+
+    /** 재고 수량 */
     private Integer stock;
 
-    /** JPA는 기본 생성자가 필요합니다. */
+    /** JPA가 객체를 만들 때 필요한 기본 생성자 */
     public Product() {
     }
 
-    /** 초기 데이터 삽입 등에 사용하는 편의 생성자 */
+    /** 테스트/시드 데이터 삽입용 생성자 */
     public Product(String name, String category, Integer price, Integer stock) {
         this.name = name;
         this.category = category;

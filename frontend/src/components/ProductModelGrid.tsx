@@ -1,7 +1,9 @@
 /**
- * AG Grid로 모델 목록을 표시하는 컴포넌트.
- * 그리드 행 클릭 시 onSelect로 선택된 모델을 부모(App)에 전달합니다.
- * App에서 ModelDetailModal을 엽니다.
+ * 품목 AG Grid 컴포넌트.
+ *
+ * ag-grid-react 라이브러리로 테이블(그리드) UI를 렌더링합니다.
+ * - showProductColumn=true: 전체 조회 시 "상품명" 컬럼 추가
+ * - 행 클릭 → onSelect → App에서 Modal 오픈
  */
 import { useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
@@ -10,27 +12,41 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import type { ProductModel } from '../api';
 
+/** 그리드 한 행 타입 (상품명 표시용 productName 필드 추가) */
+export type ProductModelRow = ProductModel & {
+  productName?: string;
+};
+
 type ProductModelGridProps = {
-  productName: string;
-  models: ProductModel[];
+  title: string;
+  models: ProductModelRow[];
   highlightedModelId: number | null;
   loading: boolean;
+  showProductColumn?: boolean;
   onSelect: (model: ProductModel) => void;
 };
 
 export function ProductModelGrid({
-  productName,
+  title,
   models,
   highlightedModelId,
   loading,
+  showProductColumn = false,
   onSelect,
 }: ProductModelGridProps) {
-  /** 그리드 컬럼 정의. useMemo로 불필요한 재생성 방지 */
-  const columnDefs = useMemo<ColDef<ProductModel>[]>(
-    () => [
+  // columnDefs: AG Grid 컬럼 정의 (헤더명, 너비, 포맷 등)
+  const columnDefs = useMemo<ColDef<ProductModelRow>[]>(() => {
+    const cols: ColDef<ProductModelRow>[] = [
       { field: 'id', headerName: 'ID', width: 80 },
-      { field: 'modelName', headerName: '모델명', flex: 1 },
-      { field: 'modelCode', headerName: '모델코드', width: 120 },
+    ];
+
+    if (showProductColumn) {
+      cols.push({ field: 'productName', headerName: '상품명', width: 130 });
+    }
+
+    cols.push(
+      { field: 'modelName', headerName: '품목명', flex: 1 },
+      { field: 'modelCode', headerName: '품목코드', width: 120 },
       {
         field: 'price',
         headerName: '가격',
@@ -39,38 +55,35 @@ export function ProductModelGrid({
           params.value != null ? `${params.value.toLocaleString()}원` : '',
       },
       { field: 'stock', headerName: '재고', width: 100 },
-    ],
-    [],
-  );
+    );
 
-  /** 행 클릭 → 부모(App)의 openModelDetail 호출 → ModelDetailModal 표시 */
-  const onRowClicked = (event: RowClickedEvent<ProductModel>) => {
-    if (event.data) {
-      onSelect(event.data);
-    }
+    return cols;
+  }, [showProductColumn]);
+
+  const onRowClicked = (event: RowClickedEvent<ProductModelRow>) => {
+    if (event.data) onSelect(event.data);
   };
 
   return (
     <div className="model-panel">
-      <h2 className="model-panel-title">{productName} 모델 목록</h2>
-      {loading ? (
-        <div className="model-grid-state">모델을 불러오는 중...</div>
-      ) : (
-        <div className="model-grid-wrapper ag-theme-quartz">
-          <AgGridReact<ProductModel>
-            rowData={models}
-            columnDefs={columnDefs}
-            onRowClicked={onRowClicked}
-            rowSelection="single"
-            domLayout="autoHeight"
-            animateRows
-            getRowClass={(params) =>
-              // Modal 또는 폼 수정 중인 행(highlightedModelId)에 파란 배경 적용
-              params.data?.id === highlightedModelId ? 'ag-row-selected-custom' : undefined
-            }
-          />
-        </div>
-      )}
+      <h2 className="model-panel-title">{title} · 품목 목록 (AG Grid)</h2>
+      <p className="model-panel-hint">행을 클릭하면 품목 상세 Modal이 열립니다.</p>
+      <div className="model-grid-wrapper ag-theme-quartz">
+        {loading && (
+          <div className="model-grid-loading">품목을 불러오는 중...</div>
+        )}
+        <AgGridReact<ProductModelRow>
+          rowData={models}
+          columnDefs={columnDefs}
+          onRowClicked={onRowClicked}
+          rowSelection="single"
+          domLayout="autoHeight"
+          animateRows
+          getRowClass={(params) =>
+            params.data?.id === highlightedModelId ? 'ag-row-selected-custom' : undefined
+          }
+        />
+      </div>
     </div>
   );
 }

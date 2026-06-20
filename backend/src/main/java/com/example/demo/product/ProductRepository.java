@@ -3,8 +3,11 @@ package com.example.demo.product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * Product Entity용 Repository.
- * JpaRepository를 상속하면 findAll, save, deleteById 등 기본 CRUD가 자동 제공됩니다.
+ * 상품(Product) DB 접근용 Repository.
+ *
+ * <p>{@code JpaRepository<Product, Long>}를 상속하면
+ * findAll, findById, save, deleteById 같은 CRUD 메서드를
+ * 직접 구현하지 않고도 바로 사용할 수 있습니다.</p>
  */
 public interface ProductRepository extends JpaRepository<Product, Long> {
 }

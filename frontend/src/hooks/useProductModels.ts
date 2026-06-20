@@ -1,18 +1,21 @@
 /**
- * 모델 관련 REST API 상태/로직 Hook.
- * nested resource: /api/products/{productId}/models
+ * 품목(ProductModel) API 상태 관리 Custom Hook.
+ *
+ * - load(productId): 한 상품의 품목만 조회 (카드 클릭 시)
+ * - loadAllForProducts: 여러 상품 품목을 합쳐 조회 (화면 시작·전체 Tab)
  */
 import { useCallback, useState } from 'react';
-import { productModelsApi, type ProductModel, type ProductModelPayload } from '../api';
+import { productModelsApi, type Product, type ProductModel, type ProductModelPayload } from '../api';
 
 export type { ProductModelPayload };
 
 export function useProductModels() {
   const [models, setModels] = useState<ProductModel[]>([]);
   const [loading, setLoading] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false); // Modal 상세 로딩
   const [error, setError] = useState<string | null>(null);
 
+  /** 단일 상품의 품목 목록 */
   const load = useCallback(async (productId: number) => {
     setLoading(true);
     setError(null);
@@ -26,7 +29,34 @@ export function useProductModels() {
     }
   }, []);
 
-  /** GET /api/products/{productId}/models/{id} — Modal 상세용 */
+  /**
+   * 화면 시작·전체 Tab용: productList에 속한 모든 상품의 품목을
+   * Promise.all로 병렬 조회한 뒤 하나의 배열로 합칩니다.
+   */
+  const loadAllForProducts = useCallback(async (productList: Product[]) => {
+    const productIds = productList
+      .map((product) => product.id)
+      .filter((id): id is number => id != null);
+
+    if (productIds.length === 0) {
+      setModels([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const lists = await Promise.all(productIds.map((id) => productModelsApi.list(id)));
+      setModels(lists.flat());
+    } catch (e) {
+      setModels([]);
+      setError(e instanceof Error ? e.message : '품목 목록을 불러오지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /** AG Grid 행 클릭 → Modal용 단건 상세 */
   const getById = useCallback(async (productId: number, modelId: number) => {
     setDetailLoading(true);
     setError(null);
@@ -71,6 +101,7 @@ export function useProductModels() {
     error,
     setError,
     load,
+    loadAllForProducts,
     getById,
     create,
     update,

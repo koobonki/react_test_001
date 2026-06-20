@@ -16,13 +16,17 @@ import java.util.List;
 
 /**
  * 상품 REST API Controller.
- * URL prefix: /api/products
  *
- * GET    /api/products       → 전체 조회
+ * <p>URL prefix: {@code /api/products}</p>
+ * <p>Frontend의 {@code productsApi}와 1:1로 연결됩니다.</p>
+ *
+ * <pre>
+ * GET    /api/products       → 전체 목록
  * GET    /api/products/{id}  → 단건 조회
  * POST   /api/products       → 등록
  * PUT    /api/products/{id}  → 수정
- * DELETE /api/products/{id}  → 삭제
+ * DELETE /api/products/{id}  → 삭제 (연결 품목도 함께 삭제)
+ * </pre>
  */
 @RestController
 @RequestMapping("/api/products")
@@ -31,7 +35,6 @@ public class ProductController {
     private final ProductRepository productRepository;
     private final ProductModelRepository productModelRepository;
 
-    /** Spring이 Repository를 자동으로 주입(생성)해 줍니다. */
     public ProductController(
             ProductRepository productRepository,
             ProductModelRepository productModelRepository) {
@@ -39,24 +42,24 @@ public class ProductController {
         this.productModelRepository = productModelRepository;
     }
 
-    /** GET /api/products — 상품 전체 목록 */
+    /** GET /api/products — 모든 상품 조회 */
     @GetMapping
     public List<Product> findAll() {
         return productRepository.findAll();
     }
 
-    /** GET /api/products/{id} — id로 상품 1건 조회. 없으면 404 */
+    /** GET /api/products/{id} — ID로 상품 1건 조회. 없으면 404 */
     @GetMapping("/{id}")
     public Product findById(@PathVariable Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
     }
 
-    /** POST /api/products — 새 상품 등록. 성공 시 201 Created */
+    /** POST /api/products — 새 상품 등록. HTTP 201 Created 반환 */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Product create(@RequestBody Product product) {
-        product.setId(null); // 클라이언트가 보낸 id는 무시하고 DB가 새 번호 부여
+        product.setId(null); // 클라이언트가 보낸 id는 무시하고 DB가 새 ID 생성
         return productRepository.save(product);
     }
 
@@ -74,7 +77,10 @@ public class ProductController {
         return productRepository.save(existing);
     }
 
-    /** DELETE /api/products/{id} — 상품 삭제. 연결된 모델도 함께 삭제 */
+    /**
+     * DELETE /api/products/{id} — 상품 삭제.
+     * FK 관계 때문에 먼저 해당 상품의 품목(product_models)을 삭제합니다.
+     */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

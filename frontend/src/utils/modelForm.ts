@@ -1,7 +1,9 @@
-import type { ProductModel } from '../api';
-import type { ProductModelPayload } from '../api';
+/**
+ * 품목 CRUD 폼용 유틸.
+ */
+import type { ProductModel, ProductModelPayload } from '../api';
 
-/** 모델 폼 초기값 */
+/** 신규 품목 등록 시 빈 폼 */
 export const emptyModelForm: ProductModelPayload = {
   modelName: '',
   modelCode: '',
@@ -9,7 +11,7 @@ export const emptyModelForm: ProductModelPayload = {
   stock: 0,
 };
 
-/** ProductModel → 폼 payload 변환 */
+/** API 품목 → 폼 입력값 */
 export function toModelForm(model: ProductModel): ProductModelPayload {
   return {
     modelName: model.modelName,

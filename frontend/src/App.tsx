@@ -1,11 +1,16 @@
 /**
- * 메인 App 컴포넌트.
+ * 메인 App 컴포넌트 — 화면 전체의 상태와 UI를 조합합니다.
  *
- * 구조:
- * - api.ts / hooks: REST API 호출
- * - utils: 폼 데이터 변환
- * - components: UI (카드, Grid, Modal)
- * - App: 상태 조합 + 이벤트 핸들러
+ * ┌─────────────────────────────────────────┐
+ * │ 1. 카테고리 Tab + 상품 카드 (ProductCardGrid) │
+ * │ 2. 상품 CRUD 폼                            │
+ * │ 3. 품목 CRUD 폼 (상품 선택 시)              │
+ * │ 4. AG Grid 품목 목록 (ProductModelGrid)    │
+ * │ 5. Modal (품목 상세)                       │
+ * └─────────────────────────────────────────┘
+ *
+ * 데이터 흐름:
+ *   api.ts → hooks(useProducts, useProductModels) → App state → components
  */
 import { useEffect, useMemo, useState } from 'react';
 import type { Product, ProductModel, ProductModelPayload, ProductPayload } from './api';
@@ -22,6 +27,7 @@ const CATEGORY_TABS = ['전체', '전자기기', '가구'] as const;
 type CategoryTab = (typeof CATEGORY_TABS)[number];
 
 function App() {
+  // ── API Hooks: Backend 호출 로직을 컴포넌트 밖으로 분리 ──
   const {
     products,
     loading: productsLoading,
@@ -41,57 +47,106 @@ function App() {
     error: modelsError,
     setError: setModelsError,
     load: loadModels,
+    loadAllForProducts,
     getById: getModelById,
     create: createModel,
     update: updateModel,
     remove: deleteModel,
-    clear: clearModels,
   } = useProductModels();
 
+  // ── 로컬 UI 상태 (폼, 선택, Tab, 필터, Modal) ──
   const [productForm, setProductForm] = useState<ProductPayload>(emptyProductForm);
   const [modelForm, setModelForm] = useState<ProductModelPayload>(emptyModelForm);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [selectedProductName, setSelectedProductName] = useState<string | null>(null);
-  /** 폼 수정 모드일 때만 설정 (Modal 클릭과 분리) */
   const [editingModelId, setEditingModelId] = useState<number | null>(null);
-  /** GET /api/products/{id}/models/{modelId} 로 조회한 Modal 데이터 */
   const [detailModel, setDetailModel] = useState<ProductModel | null>(null);
   const [categoryTab, setCategoryTab] = useState<CategoryTab>('전체');
-
-  /** 상품재고 토글 — true면 재고 있는 상품(stock > 0)만 카드에 표시 */
   const [productStockOnly, setProductStockOnly] = useState(false);
-
-  /** 재고10개 이상 토글 — true면 stock >= 10 모델만 AG Grid에 표시 */
   const [modelStock10Plus, setModelStock10Plus] = useState(false);
 
   const error = productsError ?? modelsError;
 
+  /** 앱 최초 실행 시 전체 Tab + 필터 없이 모든 상품을 표시합니다. */
   useEffect(() => {
+    setCategoryTab('전체');
+    setProductStockOnly(false);
+    setModelStock10Plus(false);
+    setSelectedProductId(null);
+    setSelectedProductName(null);
+    setEditingModelId(null);
+    setDetailModel(null);
+    setProductForm(emptyProductForm);
+    setModelForm(emptyModelForm);
     loadProducts();
   }, [loadProducts]);
 
-  /** 카테고리 Tab + 상품재고 토글로 상품 카드 목록 필터 (클라이언트 사이드) */
   const filteredProducts = useMemo(() => {
     let result =
       categoryTab === '전체'
         ? products
         : products.filter((product) => product.category === categoryTab);
-
     if (productStockOnly) {
       result = result.filter((product) => product.stock > 0);
     }
-
     return result;
   }, [products, categoryTab, productStockOnly]);
 
-  /** 재고10개 이상 토글로 모델 Grid 목록 필터 (클라이언트 사이드) */
+  /** 상품 선택 없을 때 — Tab/필터에 맞는 전체 품목을 AG Grid에 표시 */
+  useEffect(() => {
+    if (productsLoading || selectedProductId) return;
+    loadAllForProducts(filteredProducts);
+  }, [productsLoading, selectedProductId, filteredProducts, loadAllForProducts]);
+
+  /** Tab별 상품 개수 (재고 필터 반영) */
+  const categoryCounts = useMemo(() => {
+    const base =
+      productStockOnly ? products.filter((p) => p.stock > 0) : products;
+    return {
+      전체: base.length,
+      전자기기: base.filter((p) => p.category === '전자기기').length,
+      가구: base.filter((p) => p.category === '가구').length,
+    } satisfies Record<CategoryTab, number>;
+  }, [products, productStockOnly]);
+
+  const handleCategoryTabChange = (tab: CategoryTab) => {
+    setCategoryTab(tab);
+    if (!selectedProductId) return;
+
+    const stillVisible = products.some(
+      (p) =>
+        p.id === selectedProductId &&
+        (tab === '전체' || p.category === tab) &&
+        (!productStockOnly || p.stock > 0),
+    );
+    if (!stillVisible) {
+      resetProductForm();
+    }
+  };
+
   const filteredModels = useMemo(() => {
     if (!modelStock10Plus) return models;
     return models.filter((model) => model.stock >= 10);
   }, [models, modelStock10Plus]);
 
-  /** Grid/Modal에서 강조 표시할 모델 id */
+  // AG Grid 행에 상품명 컬럼을 채우기 위한 데이터 가공
+  const gridModels = useMemo(() => {
+    const nameById = new Map(products.map((product) => [product.id, product.name]));
+    return filteredModels.map((model) => ({
+      ...model,
+      productName: model.productId ? nameById.get(model.productId) ?? '' : '',
+    }));
+  }, [filteredModels, products]);
+
+  const gridTitle = selectedProductName
+    ? selectedProductName
+    : categoryTab === '전체'
+      ? '전체'
+      : categoryTab;
+
   const highlightedModelId = detailModel?.id ?? editingModelId;
+
+  // ── 이벤트 핸들러 ──
 
   const clearModelUi = () => {
     setEditingModelId(null);
@@ -99,7 +154,7 @@ function App() {
     setModelForm(emptyModelForm);
   };
 
-  /** GET /api/products/{id} + GET .../models — 상품 선택 */
+  /** 상품 카드 클릭: 폼 채우기 + 해당 상품 품목만 AG Grid에 표시 */
   const selectProduct = async (product: Product) => {
     if (!product.id) return;
 
@@ -119,35 +174,45 @@ function App() {
     await loadModels(product.id);
   };
 
-  /** GET /api/products/{productId}/models/{id} — Modal 상세 조회 */
   const openModelDetail = async (model: ProductModel) => {
-    if (!model.id || !selectedProductId) return;
+    const productId = model.productId ?? selectedProductId;
+    if (!model.id || !productId) return;
 
     setProductsError(null);
     setModelsError(null);
-    const detail = await getModelById(selectedProductId, model.id);
-    if (detail) {
-      setDetailModel(detail);
-    }
+    const detail = await getModelById(productId, model.id);
+    if (detail) setDetailModel(detail);
   };
 
-  const closeModelDetail = () => {
-    setDetailModel(null);
-  };
+  const closeModelDetail = () => setDetailModel(null);
 
-  /** Modal → 폼 수정 모드 전환 */
   const editModelFromDetail = () => {
     if (!detailModel?.id) return;
+
+    const productId = detailModel.productId ?? selectedProductId;
+    if (productId && !selectedProductId) {
+      const product = products.find((item) => item.id === productId);
+      if (product?.id) {
+        setSelectedProductId(product.id);
+        setSelectedProductName(product.name);
+        setProductForm(toProductForm(product));
+      }
+    }
+
     setEditingModelId(detailModel.id);
     setModelForm(toModelForm(detailModel));
     setDetailModel(null);
   };
 
+  const detailProductName =
+    products.find((product) => product.id === detailModel?.productId)?.name ??
+    selectedProductName ??
+    '';
+
   const resetProductForm = () => {
     setSelectedProductId(null);
     setSelectedProductName(null);
     clearModelUi();
-    clearModels();
     setProductForm(emptyProductForm);
   };
 
@@ -216,6 +281,47 @@ function App() {
 
       {error && <p className="error">{error}</p>}
 
+      {/* ── 1. 카테고리 Tab + 상품 카드 ── */}
+      <div className="grid-panel">
+        <div className="category-tabs-bar">
+          <div className="category-tabs" role="tablist" aria-label="카테고리">
+            {CATEGORY_TABS.map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={categoryTab === tab}
+                className={categoryTab === tab ? 'tab active' : 'tab'}
+                onClick={() => handleCategoryTabChange(tab)}
+              >
+                {tab}
+                <span className="tab-count">{categoryCounts[tab]}</span>
+              </button>
+            ))}
+          </div>
+          <div className="category-tab-filters">
+            <ToggleSwitch
+              label="상품재고"
+              checked={productStockOnly}
+              onChange={setProductStockOnly}
+            />
+            <ToggleSwitch
+              label="재고10개 이상"
+              checked={modelStock10Plus}
+              onChange={setModelStock10Plus}
+            />
+          </div>
+        </div>
+        <ProductCardGrid
+          products={filteredProducts}
+          selectedId={selectedProductId}
+          loading={productsLoading}
+          activeCategory={categoryTab}
+          onSelect={selectProduct}
+        />
+      </div>
+
+      {/* ── 2. 상품 REST API CRUD 폼 ── */}
       <section className="section-panel">
         <h2 className="section-title">상품 API · /api/products</h2>
         <div className="form-panel">
@@ -268,62 +374,23 @@ function App() {
         </div>
       </section>
 
-      <div className="grid-panel">
-        {/* Tab(왼쪽) + 재고 필터 토글(오른쪽) */}
-        <div className="category-tabs-bar">
-          <div className="category-tabs" role="tablist" aria-label="카테고리">
-            {CATEGORY_TABS.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                role="tab"
-                aria-selected={categoryTab === tab}
-                className={categoryTab === tab ? 'tab active' : 'tab'}
-                onClick={() => setCategoryTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="category-tab-filters">
-            {/* ON: stock > 0 상품만 → filteredProducts */}
-            <ToggleSwitch
-              label="상품재고"
-              checked={productStockOnly}
-              onChange={setProductStockOnly}
-            />
-            {/* ON: stock >= 10 모델만 → filteredModels → ProductModelGrid */}
-            <ToggleSwitch
-              label="재고10개 이상"
-              checked={modelStock10Plus}
-              onChange={setModelStock10Plus}
-            />
-          </div>
-        </div>
-        <ProductCardGrid
-          products={filteredProducts}
-          selectedId={selectedProductId}
-          loading={productsLoading}
-          onSelect={selectProduct}
-        />
-      </div>
-
+      {/* ── 3. 품목 REST API CRUD 폼 (상품 선택 시에만) ── */}
       {selectedProductId && selectedProductName && (
         <>
           <section className="section-panel">
             <h2 className="section-title">
-              모델 API · /api/products/{selectedProductId}/models
+              품목 API · /api/products/{selectedProductId}/models
             </h2>
             <div className="form-panel">
               <label>
-                모델명
+                품목명
                 <input
                   value={modelForm.modelName}
                   onChange={(e) => setModelForm({ ...modelForm, modelName: e.target.value })}
                 />
               </label>
               <label>
-                모델코드
+                품목코드
                 <input
                   value={modelForm.modelCode}
                   onChange={(e) => setModelForm({ ...modelForm, modelCode: e.target.value })}
@@ -363,24 +430,27 @@ function App() {
               </button>
             </div>
           </section>
-
-          <ProductModelGrid
-            productName={selectedProductName}
-            models={filteredModels}
-            highlightedModelId={highlightedModelId}
-            loading={modelsLoading || detailLoading}
-            onSelect={openModelDetail}
-          />
-
-          {detailModel && (
-            <ModelDetailModal
-              productName={selectedProductName}
-              model={detailModel}
-              onClose={closeModelDetail}
-              onEdit={editModelFromDetail}
-            />
-          )}
         </>
+      )}
+
+      {/* ── 4. AG Grid (화면 최하단, 시작 시 전체 품목 표시) ── */}
+      <ProductModelGrid
+        title={gridTitle}
+        models={gridModels}
+        highlightedModelId={highlightedModelId}
+        loading={modelsLoading || detailLoading}
+        showProductColumn={!selectedProductId}
+        onSelect={openModelDetail}
+      />
+
+      {/* ── 5. 품목 상세 Modal (overlay) ── */}
+      {detailModel && (
+        <ModelDetailModal
+          productName={detailProductName}
+          model={detailModel}
+          onClose={closeModelDetail}
+          onEdit={editModelFromDetail}
+        />
       )}
     </div>
   );

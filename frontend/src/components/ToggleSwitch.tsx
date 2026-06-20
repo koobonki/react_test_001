@@ -1,21 +1,18 @@
 /**
- * 토글 스위치 UI 컴포넌트.
+ * 토글 스위치 UI (체크박스를 스위치 모양으로 표시).
  *
- * 카테고리 Tab 우측의 필터(상품재고, 재고10개 이상)에 사용됩니다.
- * - checkbox input으로 동작 (접근성·키보드 조작 지원)
- * - checked=true → 켜짐, false → 꺼짐
+ * App.tsx에서 "상품재고", "재고10개 이상" 필터에 사용합니다.
  */
 type ToggleSwitchProps = {
-  label: string;                    // 스위치 왼쪽에 표시할 텍스트
-  checked: boolean;                 // 켜짐/꺼짐 상태
-  onChange: (checked: boolean) => void; // 상태 변경 시 App으로 전달
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
 };
 
 export function ToggleSwitch({ label, checked, onChange }: ToggleSwitchProps) {
   return (
     <label className="toggle-switch">
       <span className="toggle-switch-label">{label}</span>
-      {/* 실제 on/off 값은 checkbox가 담당 (화면에는 track/thumb만 표시) */}
       <input
         type="checkbox"
         className="toggle-switch-input"
