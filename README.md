@@ -2,7 +2,11 @@
 
 로컬 개발/학습용 풀스택 **상품·품목 관리** 샘플 프로젝트입니다.
 
-> 상세 구조: [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) · Frontend: [FRONTEND_STRUCTURE.md](./FRONTEND_STRUCTURE.md) · 종합 가이드: [PROJECT_GUIDE.md](./PROJECT_GUIDE.md)
+> **문서**
+> - [PROJECT_구조_상세.md](./PROJECT_구조_상세.md) — 아키텍처·디렉터리·API 상세
+> - [BACKEND_작업지시서.md](./BACKEND_작업지시서.md) — Backend(IntelliJ) 작업 가이드
+> - [FRONTEND_작업지시서.md](./FRONTEND_작업지시서.md) — Frontend(VS Code) 작업 가이드
+> - [PROJECT_GUIDE.md](./PROJECT_GUIDE.md) · [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) · [FRONTEND_STRUCTURE.md](./FRONTEND_STRUCTURE.md)
 
 ---
 

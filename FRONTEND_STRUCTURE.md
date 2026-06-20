@@ -2,6 +2,7 @@
 
 React + TypeScript + Vite + AG Grid 기반 SPA입니다.
 
+> **작업 가이드: [FRONTEND_작업지시서.md](./FRONTEND_작업지시서.md)** · **전체 구조: [PROJECT_구조_상세.md](./PROJECT_구조_상세.md)**
 ---
 
 ## 1. 파일 역할 한눈에 보기
