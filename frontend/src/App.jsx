@@ -10,10 +10,9 @@
  * └─────────────────────────────────────────┘
  *
  * 데이터 흐름:
- *   api.ts → hooks(useProducts, useProductModels) → App state → components
+ *   api.js → hooks(useProducts, useProductModels) → App state → components
  */
 import { useEffect, useMemo, useState } from 'react';
-import type { Product, ProductModel, ProductModelPayload, ProductPayload } from './api';
 import { ProductCardGrid } from './components/ProductCardGrid';
 import { ProductModelGrid } from './components/ProductModelGrid';
 import { ModelDetailModal } from './components/ModelDetailModal';
@@ -23,8 +22,7 @@ import { useProductModels } from './hooks/useProductModels';
 import { emptyProductForm, toProductForm } from './utils/productForm';
 import { emptyModelForm, toModelForm } from './utils/modelForm';
 
-const CATEGORY_TABS = ['전체', '전자기기', '가구'] as const;
-type CategoryTab = (typeof CATEGORY_TABS)[number];
+const CATEGORY_TABS = ['전체', '전자기기', '가구'];
 
 function App() {
   // ── API Hooks: Backend 호출 로직을 컴포넌트 밖으로 분리 ──
@@ -55,13 +53,13 @@ function App() {
   } = useProductModels();
 
   // ── 로컬 UI 상태 (폼, 선택, Tab, 필터, Modal) ──
-  const [productForm, setProductForm] = useState<ProductPayload>(emptyProductForm);
-  const [modelForm, setModelForm] = useState<ProductModelPayload>(emptyModelForm);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [selectedProductName, setSelectedProductName] = useState<string | null>(null);
-  const [editingModelId, setEditingModelId] = useState<number | null>(null);
-  const [detailModel, setDetailModel] = useState<ProductModel | null>(null);
-  const [categoryTab, setCategoryTab] = useState<CategoryTab>('전체');
+  const [productForm, setProductForm] = useState(emptyProductForm);
+  const [modelForm, setModelForm] = useState(emptyModelForm);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [selectedProductName, setSelectedProductName] = useState(null);
+  const [editingModelId, setEditingModelId] = useState(null);
+  const [detailModel, setDetailModel] = useState(null);
+  const [categoryTab, setCategoryTab] = useState('전체');
   const [productStockOnly, setProductStockOnly] = useState(false);
   const [modelStock10Plus, setModelStock10Plus] = useState(false);
 
@@ -106,10 +104,10 @@ function App() {
       전체: base.length,
       전자기기: base.filter((p) => p.category === '전자기기').length,
       가구: base.filter((p) => p.category === '가구').length,
-    } satisfies Record<CategoryTab, number>;
+    };
   }, [products, productStockOnly]);
 
-  const handleCategoryTabChange = (tab: CategoryTab) => {
+  const handleCategoryTabChange = (tab) => {
     setCategoryTab(tab);
     if (!selectedProductId) return;
 
@@ -155,7 +153,7 @@ function App() {
   };
 
   /** 상품 카드 클릭: 폼 채우기 + 해당 상품 품목만 AG Grid에 표시 */
-  const selectProduct = async (product: Product) => {
+  const selectProduct = async (product) => {
     if (!product.id) return;
 
     setSelectedProductId(product.id);
@@ -174,7 +172,7 @@ function App() {
     await loadModels(product.id);
   };
 
-  const openModelDetail = async (model: ProductModel) => {
+  const openModelDetail = async (model) => {
     const productId = model.productId ?? selectedProductId;
     if (!model.id || !productId) return;
 

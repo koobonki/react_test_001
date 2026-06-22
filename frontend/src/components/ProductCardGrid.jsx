@@ -4,10 +4,9 @@
  * Tab으로 필터된 상품 목록을 아이콘 카드(5열)로 표시합니다.
  * 카드 클릭 → onSelect(product) → App에서 상품 선택 + 품목 로드
  */
-import type { Product } from '../api';
 
 /** 상품명에 맞는 이모지 (DB가 아닌 Frontend 하드코딩) */
-const PRODUCT_ICONS: Record<string, string> = {
+const PRODUCT_ICONS = {
   노트북: '💻',
   '무선 마우스': '🖱️',
   '기계식 키보드': '⌨️',
@@ -16,26 +15,16 @@ const PRODUCT_ICONS: Record<string, string> = {
 };
 
 /** 상품명 매칭 실패 시 카테고리별 기본 아이콘 */
-const CATEGORY_ICONS: Record<string, string> = {
+const CATEGORY_ICONS = {
   전자기기: '📱',
   가구: '🛋️',
 };
 
 const DEFAULT_ICON = '📦';
 
-function getProductIcon(name: string, category: string) {
+function getProductIcon(name, category) {
   return PRODUCT_ICONS[name] ?? CATEGORY_ICONS[category] ?? DEFAULT_ICON;
 }
-
-type CategoryTab = '전체' | '전자기기' | '가구';
-
-type ProductCardGridProps = {
-  products: Product[];
-  selectedId: number | null;
-  loading: boolean;
-  activeCategory: CategoryTab;
-  onSelect: (product: Product) => void;
-};
 
 export function ProductCardGrid({
   products,
@@ -43,7 +32,7 @@ export function ProductCardGrid({
   loading,
   activeCategory,
   onSelect,
-}: ProductCardGridProps) {
+}) {
   if (loading) {
     return <div className="product-grid-state">상품을 불러오는 중...</div>;
   }

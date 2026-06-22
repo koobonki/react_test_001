@@ -97,7 +97,7 @@ backend/
 1. `Product.java`에 필드 + getter/setter 추가
 2. `ddl-auto: update` 이므로 Backend 재시작 시 H2 테이블 자동 반영
 3. `ProductController.update()` 에서 필드 매핑 추가
-4. Frontend `api.ts`의 `Product` 타입도 함께 수정 (협업)
+4. Frontend `api.js`의 API 호출 코드도 함께 수정 (협업)
 
 ```java
 // Product.java
@@ -227,7 +227,7 @@ Remove-Item data\demo-db.mv.db -Force
 
 - [ ] Entity / Repository / Controller 순서로 구현
 - [ ] H2 Console 또는 Postman으로 API 테스트
-- [ ] Frontend `api.ts` 타입·함수 추가 (필요 시)
+- [ ] Frontend `api.js` 함수 추가 (필요 시)
 - [ ] CORS origin 확인
 - [ ] Java 파일 상단 주석·메서드 설명 유지
 

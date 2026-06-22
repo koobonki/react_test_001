@@ -1,15 +1,9 @@
 /**
  * 토글 스위치 UI (체크박스를 스위치 모양으로 표시).
  *
- * App.tsx에서 "상품재고", "재고10개 이상" 필터에 사용합니다.
+ * App.jsx에서 "상품재고", "재고10개 이상" 필터에 사용합니다.
  */
-type ToggleSwitchProps = {
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-};
-
-export function ToggleSwitch({ label, checked, onChange }: ToggleSwitchProps) {
+export function ToggleSwitch({ label, checked, onChange }) {
   return (
     <label className="toggle-switch">
       <span className="toggle-switch-label">{label}</span>

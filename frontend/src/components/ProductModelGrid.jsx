@@ -7,24 +7,8 @@
  */
 import { useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, RowClickedEvent } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
-import type { ProductModel } from '../api';
-
-/** 그리드 한 행 타입 (상품명 표시용 productName 필드 추가) */
-export type ProductModelRow = ProductModel & {
-  productName?: string;
-};
-
-type ProductModelGridProps = {
-  title: string;
-  models: ProductModelRow[];
-  highlightedModelId: number | null;
-  loading: boolean;
-  showProductColumn?: boolean;
-  onSelect: (model: ProductModel) => void;
-};
 
 export function ProductModelGrid({
   title,
@@ -33,10 +17,10 @@ export function ProductModelGrid({
   loading,
   showProductColumn = false,
   onSelect,
-}: ProductModelGridProps) {
+}) {
   // columnDefs: AG Grid 컬럼 정의 (헤더명, 너비, 포맷 등)
-  const columnDefs = useMemo<ColDef<ProductModelRow>[]>(() => {
-    const cols: ColDef<ProductModelRow>[] = [
+  const columnDefs = useMemo(() => {
+    const cols = [
       { field: 'id', headerName: 'ID', width: 80 },
     ];
 
@@ -60,7 +44,7 @@ export function ProductModelGrid({
     return cols;
   }, [showProductColumn]);
 
-  const onRowClicked = (event: RowClickedEvent<ProductModelRow>) => {
+  const onRowClicked = (event) => {
     if (event.data) onSelect(event.data);
   };
 
@@ -72,7 +56,7 @@ export function ProductModelGrid({
         {loading && (
           <div className="model-grid-loading">품목을 불러오는 중...</div>
         )}
-        <AgGridReact<ProductModelRow>
+        <AgGridReact
           rowData={models}
           columnDefs={columnDefs}
           onRowClicked={onRowClicked}

@@ -49,7 +49,7 @@ cd react_test_001
 
 | 구분 | 기술 | 포트 |
 |------|------|------|
-| **Frontend** | React 18, TypeScript, Vite, AG Grid | **5173** |
+| **Frontend** | React 18, JavaScript, Vite, AG Grid | **5173** |
 | **Backend** | Spring Boot 3.2, Spring Data JPA, Maven, Java 17 | **8081** |
 | **DB** | H2 파일 DB (`backend/data/demo-db.mv.db`, Git 포함) | 내장 |
 

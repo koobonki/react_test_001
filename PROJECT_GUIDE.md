@@ -99,12 +99,12 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 
 ## 7. Frontend 핵심 파일 읽는 순서
 
-1. `main.tsx` — 진입점
-2. `api.ts` — API 타입·호출
-3. `hooks/useProducts.ts` — 상품 Hook
-4. `App.tsx` — 전체 UI·로직
-5. `ProductCardGrid.tsx` — 카드 UI
-6. `ProductModelGrid.tsx` — AG Grid
+1. `main.jsx` — 진입점
+2. `api.js` — API 호출
+3. `hooks/useProducts.js` — 상품 Hook
+4. `App.jsx` — 전체 UI·로직
+5. `ProductCardGrid.jsx` — 카드 UI
+6. `ProductModelGrid.jsx` — AG Grid
 
 ---
 
@@ -144,7 +144,7 @@ mvn spring-boot:run
 
 - 클래스/파일 상단: 이 파일이 하는 일
 - 주요 메서드: HTTP 메서드, 호출 시점
-- App.tsx: JSX 섹션별 `{/* 1. Tab + 카드 */}` 주석
+- App.jsx: JSX 섹션별 `{/* 1. Tab + 카드 */}` 주석
 
 CSS(`index.css`)는 섹션별 구분 주석만 포함합니다.
 
