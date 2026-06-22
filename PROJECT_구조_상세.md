@@ -60,7 +60,7 @@ flowchart TB
 | Backend | Spring Boot, Spring Data JPA | 3.2.5 |
 | Language | Java | 17 |
 | DB | H2 (file mode) | embedded |
-| Build | Gradle, npm | — |
+| Build | Maven, npm | — |
 
 ### 2.2 포트·URL
 
@@ -88,9 +88,7 @@ react_test_001/
 │
 ├── backend/                       # ★ IntelliJ에서 Open
 │   ├── README.md
-│   ├── build.gradle
-│   ├── settings.gradle
-│   ├── gradlew.bat
+│   ├── pom.xml
 │   ├── data/
 │   │   └── demo-db.mv.db          # H2 DB (Git 포함)
 │   ├── scripts/

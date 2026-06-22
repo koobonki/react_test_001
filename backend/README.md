@@ -3,12 +3,13 @@
 ## 사전 요구사항
 
 - **JDK 17** (File → Project Structure → SDK)
+- **Maven 3.9+** (CLI 실행 시)
 - IntelliJ IDEA (Community 또는 Ultimate)
 
 ## 1. 프로젝트 열기
 
 1. IntelliJ → **Open** → `backend` 폴더 선택
-2. **Trust Project** → Gradle import 완료까지 대기
+2. **Trust Project** → Maven import 완료까지 대기
 3. JDK 17이 없으면: File → Project Structure → SDK → 17 추가
 
 ## 2. DB (H2)
@@ -30,11 +31,11 @@ Backend 실행 시 **별도 DB 설치 없이** 이 파일에 자동 연결됩니
 2. ▶ Run 클릭
 3. http://localhost:8081/api/products 확인
 
-### 방법 B — Gradle
+### 방법 B — Maven
 
 ```powershell
 cd backend
-.\gradlew.bat bootRun
+mvn spring-boot:run
 ```
 
 ## 4. DB 복원 / 재export
@@ -52,5 +53,5 @@ node scripts/export-db-snapshot.mjs
 | 문제 | 해결 |
 |------|------|
 | H2 file locked | 8081 포트 Backend 중복 실행 종료 |
-| Module not found | Gradle Reload (우클릭 build.gradle → Reload) |
+| Module not found | Maven Reload (우클릭 pom.xml → Reload Project) |
 | JDK 오류 | Project SDK를 17로 설정 |

@@ -34,8 +34,9 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 ## 3. 실행 체크리스트
 
 - [ ] Java 17 설치 확인 (`java -version`)
+- [ ] Maven 설치 확인 (`mvn -v`)
 - [ ] Node.js 18+ 설치 확인 (`node -v`)
-- [ ] Backend: `cd backend && .\gradlew.bat bootRun`
+- [ ] Backend: `cd backend && mvn spring-boot:run`
 - [ ] http://localhost:8081/api/products → JSON 배열 확인
 - [ ] Frontend: `cd frontend && npm run dev`
 - [ ] http://localhost:5173 → Tab + 카드 + AG Grid 확인
@@ -111,7 +112,7 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 
 | 증상 | 원인 | 해결 |
 |------|------|------|
-| `Backend에 연결할 수 없습니다` | Backend 미실행 | `gradlew bootRun` |
+| `Backend에 연결할 수 없습니다` | Backend 미실행 | `mvn spring-boot:run` |
 | Grid 비어 있음 | 품목 시드 없음 | Backend 재시작 |
 | H2 lock 오류 | Backend 중복 실행 | 8081 포트 프로세스 종료 |
 | Tab 클릭해도 변화 없음 | category 필드 비어 있음 | H2에서 products 확인 |
@@ -132,7 +133,7 @@ if ($p) { Stop-Process -Id $p -Force }
 # Backend 중지 후
 Remove-Item backend\data\demo-db.mv.db -ErrorAction SilentlyContinue
 cd backend
-.\gradlew.bat bootRun
+mvn spring-boot:run
 ```
 
 ---

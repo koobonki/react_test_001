@@ -26,9 +26,7 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모입니다.
 
 ```
 backend/
-├── build.gradle                 # Gradle 의존성 (Spring Boot, JPA, H2)
-├── settings.gradle
-├── gradlew.bat
+├── pom.xml                      # Maven 의존성 (Spring Boot, JPA, H2)
 ├── data/
 │   └── demo-db.mv.db            # H2 DB 파일 (실행 시 생성)
 └── src/main/
@@ -142,7 +140,7 @@ frontend/
 
 ```powershell
 # Backend
-cd backend && .\gradlew.bat bootRun
+cd backend && mvn spring-boot:run
 
 # Frontend
 cd frontend && npm run dev
