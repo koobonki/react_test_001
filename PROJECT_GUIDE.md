@@ -78,7 +78,7 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 
 | UI 동작 | Frontend | Backend |
 |---------|----------|---------|
-| 앱 시작 | `productsApi.list()` | `ProductController.findAll()` |
+| 앱 시작 | `productsApi.categories()` + `productsApi.list()` | `ProductController.findCategories()` + `findAll()` |
 | 카드 클릭 | `productsApi.get(id)` | `ProductController.findById()` |
 | POST 등록 | `productsApi.create()` | `ProductController.create()` |
 | Grid 품목 | `productModelsApi.list()` | `ProductModelController.findAll()` |
@@ -152,7 +152,7 @@ CSS(`index.css`)는 섹션별 구분 주석만 포함합니다.
 
 ## 11. 확장 아이디어 (학습용)
 
-- [ ] 카테고리 Tab을 DB에서 동적으로 로드
+- [ ] 카테고리 관리 CRUD 화면 추가
 - [ ] JWT 로그인 추가
 - [ ] PostgreSQL 프로필 전환
 - [ ] 품목 전체 조회 API (`GET /api/models`) 추가

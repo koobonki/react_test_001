@@ -152,7 +152,7 @@ const search = useCallback(async (keyword) => {
 
 | 작업 | 수정 위치 |
 |------|----------|
-| Tab 카테고리 추가 | `CATEGORY_TABS`, `filteredProducts` |
+| Tab 카테고리 추가 | Backend category API + `productsApi.categories()` |
 | 필터 추가 | state + `useMemo` + `ToggleSwitch` |
 | 새 API 연동 | Hook 호출 + `useEffect` |
 | 폼 CRUD | `handleProductSubmit`, `handleModelSubmit` |

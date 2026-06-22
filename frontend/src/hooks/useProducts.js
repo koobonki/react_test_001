@@ -9,15 +9,30 @@ import { productsApi } from '../api';
 
 export function useProducts() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true); // 최초 마운트 시 true → 로딩 UI 표시
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /** GET /api/products — 목록 새로고침 */
-  const load = useCallback(async () => {
+  /** GET /api/products/categories — 카테고리 Tab 목록 새로고침 */
+  const loadCategories = useCallback(async (options) => {
+    setCategoriesLoading(true);
+    setError(null);
+    try {
+      setCategories(await productsApi.categories(options));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '카테고리 목록을 불러오지 못했습니다.');
+    } finally {
+      setCategoriesLoading(false);
+    }
+  }, []);
+
+  /** GET /api/products — 전체 또는 카테고리별 상품 목록 새로고침 */
+  const load = useCallback(async (options) => {
     setLoading(true);
     setError(null);
     try {
-      setProducts(await productsApi.list());
+      setProducts(await productsApi.list(options));
     } catch (e) {
       setError(e instanceof Error ? e.message : '상품 목록을 불러오지 못했습니다.');
     } finally {
@@ -31,28 +46,36 @@ export function useProducts() {
     return productsApi.get(id);
   }, []);
 
-  /** POST 후 목록 자동 갱신 */
+  /** POST — 저장 후 화면 갱신은 App에서 현재 Tab 조건으로 다시 조회 */
   const create = useCallback(async (payload) => {
     setError(null);
-    const created = await productsApi.create(payload);
-    await load();
-    return created;
-  }, [load]);
+    return productsApi.create(payload);
+  }, []);
 
-  /** PUT 후 목록 자동 갱신 */
+  /** PUT — 저장 후 화면 갱신은 App에서 현재 Tab 조건으로 다시 조회 */
   const update = useCallback(async (id, payload) => {
     setError(null);
-    const updated = await productsApi.update(id, payload);
-    await load();
-    return updated;
-  }, [load]);
+    return productsApi.update(id, payload);
+  }, []);
 
-  /** DELETE 후 목록 자동 갱신 */
+  /** DELETE — 삭제 후 화면 갱신은 App에서 현재 Tab 조건으로 다시 조회 */
   const remove = useCallback(async (id) => {
     setError(null);
     await productsApi.delete(id);
-    await load();
-  }, [load]);
+  }, []);
 
-  return { products, loading, error, setError, load, getById, create, update, remove };
+  return {
+    products,
+    categories,
+    loading,
+    categoriesLoading,
+    error,
+    setError,
+    load,
+    loadCategories,
+    getById,
+    create,
+    update,
+    remove,
+  };
 }

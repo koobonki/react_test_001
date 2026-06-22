@@ -2,6 +2,8 @@ package com.example.demo.product;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 /**
  * 상품(Product) DB 접근용 Repository.
  *
@@ -10,4 +12,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * 직접 구현하지 않고도 바로 사용할 수 있습니다.</p>
  */
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    List<Product> findAllByOrderByIdAsc();
+
+    List<Product> findByCategoryOrderByIdAsc(String category);
+
+    List<Product> findByStockGreaterThanOrderByIdAsc(Integer stock);
+
+    List<Product> findByCategoryAndStockGreaterThanOrderByIdAsc(String category, Integer stock);
 }

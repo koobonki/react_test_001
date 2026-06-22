@@ -74,10 +74,10 @@ React + JavaScript + Vite + AG Grid 기반 SPA입니다.
 
 | 이름 | 역할 |
 |------|------|
-| `filteredProducts` | Tab + 재고 필터 적용된 상품 목록 |
+| `products` | API로 조회한 현재 Tab의 상품 카드 목록 |
 | `filteredModels` | 재고 10개 이상 필터 적용 품목 |
 | `gridModels` | Grid용 productName 컬럼 추가 |
-| `categoryCounts` | Tab 옆 개수 뱃지 |
+| `categories` | API로 조회한 Tab 이름과 개수 뱃지 |
 | mount `useEffect` | 시작 시 전체 Tab + 상품 로드 |
 | models `useEffect` | 상품 미선택 시 전체 품목 Grid 로드 |
 
@@ -89,9 +89,10 @@ React + JavaScript + Vite + AG Grid 기반 SPA입니다.
 
 ```javascript
 // api.js
-productsApi.list()           // GET  /api/products
-productsApi.get(id)          // GET  /api/products/{id}
-productModelsApi.list(pid)   // GET  /api/products/{pid}/models
+productsApi.categories()                // GET  /api/products/categories
+productsApi.list({ category })          // GET  /api/products?category=...
+productsApi.get(id)                     // GET  /api/products/{id}
+productModelsApi.list(pid)              // GET  /api/products/{pid}/models
 ```
 
 ---

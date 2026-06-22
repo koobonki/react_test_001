@@ -169,6 +169,8 @@ erDiagram
 
 ```
 GET    /api/products
+GET    /api/products?category={category}&inStockOnly=true
+GET    /api/products/categories
 GET    /api/products/{id}
 POST   /api/products
 PUT    /api/products/{id}
@@ -282,7 +284,7 @@ server: {
 
 | 필터 | State | 적용 대상 |
 |------|-------|----------|
-| Tab (전체/전자기기/가구) | `categoryTab` | `filteredProducts` (카드) |
+| Tab (전체/전자기기/가구) | `categoryTab` | category API + products API (카드) |
 | 상품재고 | `productStockOnly` | stock > 0 인 상품 |
 | 재고10개 이상 | `modelStock10Plus` | stock >= 10 인 품목 (Grid) |
 
@@ -394,7 +396,7 @@ flowchart LR
 |------|---------|----------|
 | 컬럼 추가 | Entity → Controller | api.js → form → UI |
 | API 추가 | Controller → Repository | api.js → Hook → App |
-| Tab 카테고리 | — | CATEGORY_TABS, filter |
+| Tab 카테고리 | category API | productsApi.categories, productsApi.list |
 | Grid 컬럼 | — | ProductModelGrid columnDefs |
 | 인증(JWT) | Security Config | api.js header, login UI |
 

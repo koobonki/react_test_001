@@ -6,13 +6,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 상품 REST API Controller.
@@ -21,7 +26,8 @@ import java.util.List;
  * <p>Frontend의 {@code productsApi}와 1:1로 연결됩니다.</p>
  *
  * <pre>
- * GET    /api/products       → 전체 목록
+ * GET    /api/products       → 전체/카테고리별 목록
+ * GET    /api/products/categories → 카테고리 Tab 목록
  * GET    /api/products/{id}  → 단건 조회
  * POST   /api/products       → 등록
  * PUT    /api/products/{id}  → 수정
@@ -42,10 +48,31 @@ public class ProductController {
         this.productModelRepository = productModelRepository;
     }
 
-    /** GET /api/products — 모든 상품 조회 */
+    /** GET /api/products — 전체 또는 카테고리별 상품 조회 */
     @GetMapping
-    public List<Product> findAll() {
-        return productRepository.findAll();
+    public List<Product> findAll(
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "false") boolean inStockOnly) {
+        return findProducts(category, inStockOnly);
+    }
+
+    /**
+     * GET /api/products/categories — 카테고리 Tab 표시용 목록.
+     * Frontend가 Tab과 카운트를 별도 API 조회 결과로 렌더링할 수 있게 제공합니다.
+     */
+    @GetMapping("/categories")
+    public List<ProductCategorySummary> findCategories(
+            @RequestParam(defaultValue = "false") boolean inStockOnly) {
+        List<Product> products = findProducts(null, inStockOnly);
+        Map<String, Long> countsByCategory = products.stream()
+                .filter((product) -> product.getCategory() != null && !product.getCategory().isBlank())
+                .collect(Collectors.groupingBy(Product::getCategory, LinkedHashMap::new, Collectors.counting()));
+
+        List<ProductCategorySummary> summaries = new ArrayList<>();
+        summaries.add(new ProductCategorySummary("전체", products.size()));
+        countsByCategory.forEach((category, count) ->
+                summaries.add(new ProductCategorySummary(category, count)));
+        return summaries;
     }
 
     /** GET /api/products/{id} — ID로 상품 1건 조회. 없으면 404 */
@@ -89,5 +116,23 @@ public class ProductController {
         }
         productModelRepository.deleteByProduct_Id(id);
         productRepository.deleteById(id);
+    }
+
+    private List<Product> findProducts(String category, boolean inStockOnly) {
+        boolean hasCategory = category != null && !category.isBlank() && !"전체".equals(category);
+
+        if (hasCategory && inStockOnly) {
+            return productRepository.findByCategoryAndStockGreaterThanOrderByIdAsc(category, 0);
+        }
+        if (hasCategory) {
+            return productRepository.findByCategoryOrderByIdAsc(category);
+        }
+        if (inStockOnly) {
+            return productRepository.findByStockGreaterThanOrderByIdAsc(0);
+        }
+        return productRepository.findAllByOrderByIdAsc();
+    }
+
+    public record ProductCategorySummary(String name, long count) {
     }
 }

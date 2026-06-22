@@ -11,6 +11,23 @@
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
+function productListUrl({ category, inStockOnly } = {}) {
+  const params = new URLSearchParams();
+  if (category && category !== '전체') params.set('category', category);
+  if (inStockOnly) params.set('inStockOnly', 'true');
+
+  const query = params.toString();
+  return query ? `/api/products?${query}` : '/api/products';
+}
+
+function categoryListUrl({ inStockOnly } = {}) {
+  const params = new URLSearchParams();
+  if (inStockOnly) params.set('inStockOnly', 'true');
+
+  const query = params.toString();
+  return query ? `/api/products/categories?${query}` : '/api/products/categories';
+}
+
 /**
  * fetch 공통 래퍼.
  * - 네트워크 오류 → Backend 미실행 안내
@@ -50,8 +67,11 @@ async function request(url, options, errorMessage = '요청에 실패했습니�
 
 /** /api/products CRUD */
 export const productsApi = {
-  list() {
-    return request('/api/products', undefined, '상품 목록을 불러오지 못했습니다.');
+  list(options) {
+    return request(productListUrl(options), undefined, '상품 목록을 불러오지 못했습니다.');
+  },
+  categories(options) {
+    return request(categoryListUrl(options), undefined, '카테고리 목록을 불러오지 못했습니다.');
   },
   get(id) {
     return request(`/api/products/${id}`, undefined, '상품을 불러오지 못했습니다.');
