@@ -21,7 +21,7 @@ public class DemoApplication {
 
     /**
      * 프로그램 시작점.
-     * IDE에서 이 클래스를 Run 하거나 {@code gradlew bootRun}으로 실행합니다.
+     * IDE에서 이 클래스를 Run 하거나 {@code mvn spring-boot:run}으로 실행합니다.
      */
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);

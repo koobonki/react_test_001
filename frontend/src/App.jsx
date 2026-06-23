@@ -10,10 +10,9 @@
  * └─────────────────────────────────────────┘
  *
  * 데이터 흐름:
- *   api.ts → hooks(useProducts, useProductModels) → App state → components
+ *   api.js → hooks(useProducts, useProductModels) → App state → components
  */
-import { useEffect, useMemo, useState } from 'react';
-import type { Product, ProductModel, ProductModelPayload, ProductPayload } from './api';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProductCardGrid } from './components/ProductCardGrid';
 import { ProductModelGrid } from './components/ProductModelGrid';
 import { ModelDetailModal } from './components/ModelDetailModal';
@@ -23,17 +22,17 @@ import { useProductModels } from './hooks/useProductModels';
 import { emptyProductForm, toProductForm } from './utils/productForm';
 import { emptyModelForm, toModelForm } from './utils/modelForm';
 
-const CATEGORY_TABS = ['전체', '전자기기', '가구'] as const;
-type CategoryTab = (typeof CATEGORY_TABS)[number];
-
 function App() {
   // ── API Hooks: Backend 호출 로직을 컴포넌트 밖으로 분리 ──
   const {
     products,
+    categories,
     loading: productsLoading,
+    categoriesLoading,
     error: productsError,
     setError: setProductsError,
     load: loadProducts,
+    loadCategories,
     getById: getProductById,
     create: createProduct,
     update: updateProduct,
@@ -55,88 +54,75 @@ function App() {
   } = useProductModels();
 
   // ── 로컬 UI 상태 (폼, 선택, Tab, 필터, Modal) ──
-  const [productForm, setProductForm] = useState<ProductPayload>(emptyProductForm);
-  const [modelForm, setModelForm] = useState<ProductModelPayload>(emptyModelForm);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [selectedProductName, setSelectedProductName] = useState<string | null>(null);
-  const [editingModelId, setEditingModelId] = useState<number | null>(null);
-  const [detailModel, setDetailModel] = useState<ProductModel | null>(null);
-  const [categoryTab, setCategoryTab] = useState<CategoryTab>('전체');
+  const [productForm, setProductForm] = useState(emptyProductForm);
+  const [modelForm, setModelForm] = useState(emptyModelForm);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [selectedProductName, setSelectedProductName] = useState(null);
+  const [editingModelId, setEditingModelId] = useState(null);
+  const [detailModel, setDetailModel] = useState(null);
+  const [categoryTab, setCategoryTab] = useState('전체');
   const [productStockOnly, setProductStockOnly] = useState(false);
-  const [modelStock10Plus, setModelStock10Plus] = useState(false);
+  const [alwaysExpanded, setAlwaysExpanded] = useState(false);
 
   const error = productsError ?? modelsError;
 
-  /** 앱 최초 실행 시 전체 Tab + 필터 없이 모든 상품을 표시합니다. */
+  // categories는 useProducts.loadCategories()가 Backend에서 받아온 Tab 데이터입니다.
+  // 예: [{ name: '전체', count: 7 }, { name: '전자기기', count: 3 }, ...]
+  // API 응답이 아직 도착하지 않은 첫 렌더링 순간에는 최소한 "전체" Tab이 보이도록 fallback을 둡니다.
+  const categoryTabs = categories.length > 0 ? categories : [{ name: '전체', count: products.length }];
+
+  const refreshProductQueries = useCallback(async () => {
+    // category Tab 영역과 ProductCardGrid 영역은 서로 다른 API를 호출합니다.
+    //
+    // 1) loadCategories(...)
+    //    → GET /api/products/categories
+    //    → products.category를 그룹화한 Tab 이름/개수 조회
+    //
+    // 2) loadProducts(...)
+    //    → GET /api/products?category=현재Tab&inStockOnly=토글값
+    //    → ProductCardGrid에 넣을 상품 카드 목록 조회
+    //
+    // 두 요청은 서로 독립적이므로 Promise.all로 동시에 실행합니다.
+    await Promise.all([
+      loadCategories({ inStockOnly: productStockOnly }),
+      loadProducts({ category: categoryTab, inStockOnly: productStockOnly }),
+    ]);
+  }, [categoryTab, productStockOnly, loadCategories, loadProducts]);
+
+  /** 선택된 Tab/재고 필터가 바뀔 때마다 API에서 Tab 목록과 카드 목록을 다시 조회합니다. */
   useEffect(() => {
-    setCategoryTab('전체');
-    setProductStockOnly(false);
-    setModelStock10Plus(false);
-    setSelectedProductId(null);
-    setSelectedProductName(null);
-    setEditingModelId(null);
-    setDetailModel(null);
-    setProductForm(emptyProductForm);
-    setModelForm(emptyModelForm);
-    loadProducts();
-  }, [loadProducts]);
+    refreshProductQueries();
+  }, [refreshProductQueries]);
 
-  const filteredProducts = useMemo(() => {
-    let result =
-      categoryTab === '전체'
-        ? products
-        : products.filter((product) => product.category === categoryTab);
-    if (productStockOnly) {
-      result = result.filter((product) => product.stock > 0);
-    }
-    return result;
-  }, [products, categoryTab, productStockOnly]);
-
-  /** 상품 선택 없을 때 — Tab/필터에 맞는 전체 품목을 AG Grid에 표시 */
+  /** 상품 선택 없을 때 — API로 조회한 카드 목록의 품목을 AG Grid에 표시 */
   useEffect(() => {
     if (productsLoading || selectedProductId) return;
-    loadAllForProducts(filteredProducts);
-  }, [productsLoading, selectedProductId, filteredProducts, loadAllForProducts]);
+    loadAllForProducts(products);
+  }, [productsLoading, selectedProductId, products, loadAllForProducts]);
 
-  /** Tab별 상품 개수 (재고 필터 반영) */
-  const categoryCounts = useMemo(() => {
-    const base =
-      productStockOnly ? products.filter((p) => p.stock > 0) : products;
-    return {
-      전체: base.length,
-      전자기기: base.filter((p) => p.category === '전자기기').length,
-      가구: base.filter((p) => p.category === '가구').length,
-    } satisfies Record<CategoryTab, number>;
-  }, [products, productStockOnly]);
-
-  const handleCategoryTabChange = (tab: CategoryTab) => {
-    setCategoryTab(tab);
-    if (!selectedProductId) return;
-
-    const stillVisible = products.some(
-      (p) =>
-        p.id === selectedProductId &&
-        (tab === '전체' || p.category === tab) &&
-        (!productStockOnly || p.stock > 0),
-    );
-    if (!stillVisible) {
+  /** 현재 선택된 카테고리가 API Tab 목록에서 사라지면 전체 Tab으로 복귀합니다. */
+  useEffect(() => {
+    if (categoriesLoading || categoryTab === '전체') return;
+    if (!categories.some((category) => category.name === categoryTab)) {
+      setCategoryTab('전체');
       resetProductForm();
     }
-  };
+  }, [categories, categoriesLoading, categoryTab]);
 
-  const filteredModels = useMemo(() => {
-    if (!modelStock10Plus) return models;
-    return models.filter((model) => model.stock >= 10);
-  }, [models, modelStock10Plus]);
+  const handleCategoryTabChange = (tab) => {
+    if (tab === categoryTab) return;
+    setCategoryTab(tab);
+    resetProductForm();
+  };
 
   // AG Grid 행에 상품명 컬럼을 채우기 위한 데이터 가공
   const gridModels = useMemo(() => {
     const nameById = new Map(products.map((product) => [product.id, product.name]));
-    return filteredModels.map((model) => ({
+    return models.map((model) => ({
       ...model,
       productName: model.productId ? nameById.get(model.productId) ?? '' : '',
     }));
-  }, [filteredModels, products]);
+  }, [models, products]);
 
   const gridTitle = selectedProductName
     ? selectedProductName
@@ -155,7 +141,7 @@ function App() {
   };
 
   /** 상품 카드 클릭: 폼 채우기 + 해당 상품 품목만 AG Grid에 표시 */
-  const selectProduct = async (product: Product) => {
+  const selectProduct = async (product) => {
     if (!product.id) return;
 
     setSelectedProductId(product.id);
@@ -174,7 +160,7 @@ function App() {
     await loadModels(product.id);
   };
 
-  const openModelDetail = async (model: ProductModel) => {
+  const openModelDetail = async (model) => {
     const productId = model.productId ?? selectedProductId;
     if (!model.id || !productId) return;
 
@@ -228,9 +214,11 @@ function App() {
         const updated = await updateProduct(selectedProductId, productForm);
         setProductForm(toProductForm(updated));
         setSelectedProductName(updated.name);
+        await refreshProductQueries();
       } else {
         await createProduct(productForm);
         resetProductForm();
+        await refreshProductQueries();
       }
     } catch (e) {
       setProductsError(e instanceof Error ? e.message : '상품 저장에 실패했습니다.');
@@ -243,6 +231,7 @@ function App() {
     try {
       await deleteProduct(selectedProductId);
       resetProductForm();
+      await refreshProductQueries();
     } catch (e) {
       setProductsError(e instanceof Error ? e.message : '상품 삭제에 실패했습니다.');
     }
@@ -285,17 +274,22 @@ function App() {
       <div className="grid-panel">
         <div className="category-tabs-bar">
           <div className="category-tabs" role="tablist" aria-label="카테고리">
-            {CATEGORY_TABS.map((tab) => (
+            {/* categoryTabs는 Backend의 /api/products/categories 응답입니다.
+               여기서 map으로 돌면서 각 항목을 실제 Tab 버튼으로 넣습니다.
+               tab.name  → 버튼 라벨("전체", "전자기기", "가구")
+               tab.count → 오른쪽 작은 개수 뱃지 */}
+            {categoryTabs.map((tab) => (
               <button
-                key={tab}
+                key={tab.name}
                 type="button"
                 role="tab"
-                aria-selected={categoryTab === tab}
-                className={categoryTab === tab ? 'tab active' : 'tab'}
-                onClick={() => handleCategoryTabChange(tab)}
+                aria-selected={categoryTab === tab.name}
+                className={categoryTab === tab.name ? 'tab active' : 'tab'}
+                disabled={categoriesLoading}
+                onClick={() => handleCategoryTabChange(tab.name)}
               >
-                {tab}
-                <span className="tab-count">{categoryCounts[tab]}</span>
+                {tab.name}
+                <span className="tab-count">{tab.count}</span>
               </button>
             ))}
           </div>
@@ -303,20 +297,29 @@ function App() {
             <ToggleSwitch
               label="상품재고"
               checked={productStockOnly}
-              onChange={setProductStockOnly}
+              onChange={(checked) => {
+                setProductStockOnly(checked);
+                resetProductForm();
+              }}
             />
             <ToggleSwitch
-              label="재고10개 이상"
-              checked={modelStock10Plus}
-              onChange={setModelStock10Plus}
+              label="항상 펼침"
+              checked={alwaysExpanded}
+              onChange={setAlwaysExpanded}
             />
           </div>
         </div>
         <ProductCardGrid
-          products={filteredProducts}
+          /* products는 Backend의 /api/products 응답입니다.
+             categoryTab이 "전자기기"이면 /api/products?category=전자기기 결과가 들어오고,
+             "상품재고"가 ON이면 inStockOnly=true 조건까지 적용된 결과가 들어옵니다.
+             ProductCardGrid는 별도 DB 조회를 하지 않고 이 배열을 그대로 아이콘 카드로 표시합니다. */
+          products={products}
           selectedId={selectedProductId}
           loading={productsLoading}
           activeCategory={categoryTab}
+          expanded={alwaysExpanded}
+          onToggleExpanded={() => setAlwaysExpanded((expanded) => !expanded)}
           onSelect={selectProduct}
         />
       </div>
@@ -368,7 +371,7 @@ function App() {
               DELETE 삭제
             </button>
           )}
-          <button className="secondary" onClick={loadProducts}>
+          <button className="secondary" onClick={() => refreshProductQueries()}>
             GET 새로고침
           </button>
         </div>

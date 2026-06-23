@@ -5,18 +5,16 @@
  * - loadAllForProducts: 여러 상품 품목을 합쳐 조회 (화면 시작·전체 Tab)
  */
 import { useCallback, useState } from 'react';
-import { productModelsApi, type Product, type ProductModel, type ProductModelPayload } from '../api';
-
-export type { ProductModelPayload };
+import { productModelsApi } from '../api';
 
 export function useProductModels() {
-  const [models, setModels] = useState<ProductModel[]>([]);
+  const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false); // Modal 상세 로딩
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   /** 단일 상품의 품목 목록 */
-  const load = useCallback(async (productId: number) => {
+  const load = useCallback(async (productId) => {
     setLoading(true);
     setError(null);
     try {
@@ -33,10 +31,10 @@ export function useProductModels() {
    * 화면 시작·전체 Tab용: productList에 속한 모든 상품의 품목을
    * Promise.all로 병렬 조회한 뒤 하나의 배열로 합칩니다.
    */
-  const loadAllForProducts = useCallback(async (productList: Product[]) => {
+  const loadAllForProducts = useCallback(async (productList) => {
     const productIds = productList
       .map((product) => product.id)
-      .filter((id): id is number => id != null);
+      .filter((id) => id != null);
 
     if (productIds.length === 0) {
       setModels([]);
@@ -57,7 +55,7 @@ export function useProductModels() {
   }, []);
 
   /** AG Grid 행 클릭 → Modal용 단건 상세 */
-  const getById = useCallback(async (productId: number, modelId: number) => {
+  const getById = useCallback(async (productId, modelId) => {
     setDetailLoading(true);
     setError(null);
     try {
@@ -70,21 +68,21 @@ export function useProductModels() {
     }
   }, []);
 
-  const create = useCallback(async (productId: number, payload: ProductModelPayload) => {
+  const create = useCallback(async (productId, payload) => {
     setError(null);
     const created = await productModelsApi.create(productId, payload);
     await load(productId);
     return created;
   }, [load]);
 
-  const update = useCallback(async (productId: number, modelId: number, payload: ProductModelPayload) => {
+  const update = useCallback(async (productId, modelId, payload) => {
     setError(null);
     const updated = await productModelsApi.update(productId, modelId, payload);
     await load(productId);
     return updated;
   }, [load]);
 
-  const remove = useCallback(async (productId: number, modelId: number) => {
+  const remove = useCallback(async (productId, modelId) => {
     setError(null);
     await productModelsApi.delete(productId, modelId);
     await load(productId);

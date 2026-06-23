@@ -1,5 +1,5 @@
 /**
- * 전역 CSS — App.tsx와 components에서 className으로 참조합니다.
+ * 전역 CSS — App.jsx와 components에서 className으로 참조합니다.
  *
  * 섹션 구성:
  *   - 기본/타이포/버튼
@@ -249,6 +249,12 @@ button.danger:hover {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0.75rem;
+}
+
+.product-grid-expand {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.9rem;
 }
 
 @media (max-width: 900px) {

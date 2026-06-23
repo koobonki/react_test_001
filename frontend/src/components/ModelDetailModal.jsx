@@ -5,16 +5,8 @@
  * - Modal 내부 클릭 → stopPropagation으로 닫히지 않음
  * - "수정하기" → onEdit → App에서 품목 CRUD 폼으로 데이터 이동
  */
-import type { ProductModel } from '../api';
 
-type ModelDetailModalProps = {
-  productName: string;
-  model: ProductModel;
-  onClose: () => void;
-  onEdit: () => void;
-};
-
-export function ModelDetailModal({ productName, model, onClose, onEdit }: ModelDetailModalProps) {
+export function ModelDetailModal({ productName, model, onClose, onEdit }) {
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
       <div

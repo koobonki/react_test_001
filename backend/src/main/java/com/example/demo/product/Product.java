@@ -24,7 +24,14 @@ public class Product {
     /** 상품명 (예: 노트북) */
     private String name;
 
-    /** 카테고리 (예: 전자기기, 가구) — Frontend Tab 필터에 사용 */
+    /**
+     * 카테고리 (예: 전자기기, 가구).
+     *
+     * <p>이 프로젝트는 별도 category 테이블을 두지 않고,
+     * products 테이블의 category 컬럼 값을 기준으로 Frontend Tab을 만듭니다.
+     * 예를 들어 products.category에 "전자기기", "가구" 값이 들어 있으면
+     * Backend가 이 값을 모아서 "전체 / 전자기기 / 가구" Tab 목록으로 내려줍니다.</p>
+     */
     private String category;
 
     /** 판매 가격 (원) */

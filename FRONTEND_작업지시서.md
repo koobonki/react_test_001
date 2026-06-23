@@ -1,6 +1,6 @@
 # Frontend 작업지시서
 
-React 18 + TypeScript + Vite + AG Grid 기반 SPA 개발·운영 가이드입니다.
+React 18 + JavaScript + Vite + AG Grid 기반 SPA 개발·운영 가이드입니다.
 
 > 구조 상세: [PROJECT_구조_상세.md](./PROJECT_구조_상세.md) · Backend 작업: [BACKEND_작업지시서.md](./BACKEND_작업지시서.md)
 
@@ -57,8 +57,7 @@ npm install
 ```
 frontend/
 ├── package.json              # 의존성·npm scripts
-├── vite.config.ts            # dev 서버 5173, /api 프록시
-├── tsconfig.json             # TypeScript 설정
+├── vite.config.js            # dev 서버 5173, /api 프록시
 ├── index.html                # HTML 진입점
 ├── .vscode/
 │   ├── tasks.json            # npm install / dev / build
@@ -66,27 +65,26 @@ frontend/
 │   ├── extensions.json       # 추천 확장
 │   └── settings.json         # 포맷 등
 └── src/
-    ├── main.tsx              # React 마운트
-    ├── App.tsx               # ★ 메인 UI·상태·이벤트
-    ├── api.ts                # REST API 클라이언트·타입
+    ├── main.jsx              # React 마운트
+    ├── App.jsx               # ★ 메인 UI·상태·이벤트
+    ├── api.js                # REST API 클라이언트
     ├── index.css             # 전역 CSS
-    ├── vite-env.d.ts
     ├── hooks/
-    │   ├── useProducts.ts        # 상품 API Hook
-    │   └── useProductModels.ts   # 품목 API Hook
+    │   ├── useProducts.js        # 상품 API Hook
+    │   └── useProductModels.js   # 품목 API Hook
     ├── utils/
-    │   ├── productForm.ts        # 상품 폼 변환
-    │   └── modelForm.ts          # 품목 폼 변환
+    │   ├── productForm.js        # 상품 폼 변환
+    │   └── modelForm.js          # 품목 폼 변환
     └── components/
-        ├── ProductCardGrid.tsx   # 상품 카드 (Tab 필터)
-        ├── ProductModelGrid.tsx  # AG Grid
-        ├── ModelDetailModal.tsx  # 품목 상세 Modal
-        └── ToggleSwitch.tsx      # 재고 필터 스위치
+        ├── ProductCardGrid.jsx   # 상품 카드 (Tab 필터)
+        ├── ProductModelGrid.jsx  # AG Grid
+        ├── ModelDetailModal.jsx  # 품목 상세 Modal
+        └── ToggleSwitch.jsx      # 재고 필터 스위치
 ```
 
 ---
 
-## 4. 화면 구성 (App.tsx)
+## 4. 화면 구성 (App.jsx)
 
 ```
 ┌─────────────────────────────────────┐
@@ -106,18 +104,18 @@ frontend/
 
 ## 5. 레이어별 작업 가이드
 
-### 5.1 API 타입·함수 추가 (`api.ts`)
+### 5.1 API 함수 추가 (`api.js`)
 
 Backend API가 추가되면:
 
-1. `interface` 타입 정의
-2. `productsApi` / `productModelsApi`에 메서드 추가
-3. `request()` 공통 함수 재사용
+1. `productsApi` / `productModelsApi`에 메서드 추가
+2. `request()` 공통 함수 재사용
+3. Hook 또는 App에서 새 API 함수 호출
 
-```typescript
+```javascript
 // 예: 카테고리별 조회
 export const productsApi = {
-  listByCategory(category: string): Promise<Product[]> {
+  listByCategory(category) {
     return request(`/api/products/by-category/${category}`, undefined, '조회 실패');
   },
 };
@@ -129,12 +127,12 @@ export const productsApi = {
 
 - `useState`: data, loading, error
 - `useCallback`: API 호출 함수
-- Hook 반환값을 `App.tsx`에서 destructuring
+- Hook 반환값을 `App.jsx`에서 destructuring
 
 **예: useProducts에 search 추가**
 
-```typescript
-const search = useCallback(async (keyword: string) => {
+```javascript
+const search = useCallback(async (keyword) => {
   setLoading(true);
   try {
     setProducts(await productsApi.search(keyword));
@@ -146,24 +144,24 @@ const search = useCallback(async (keyword: string) => {
 
 ### 5.3 UI 컴ponent 추가 (`components/`)
 
-- Props 타입을 `type XxxProps = { ... }` 로 명시
+- Props는 함수 매개변수 destructuring으로 받기
 - 파일 상단에 컴포넌트 역할 주석
 - 스타일은 `index.css`에 className으로 추가 (인라인 최소화)
 
-### 5.4 App.tsx 상태·이벤트
+### 5.4 App.jsx 상태·이벤트
 
 | 작업 | 수정 위치 |
 |------|----------|
-| Tab 카테고리 추가 | `CATEGORY_TABS`, `filteredProducts` |
+| Tab 카테고리 추가 | Backend category API + `productsApi.categories()` |
 | 필터 추가 | state + `useMemo` + `ToggleSwitch` |
 | 새 API 연동 | Hook 호출 + `useEffect` |
 | 폼 CRUD | `handleProductSubmit`, `handleModelSubmit` |
 
 ### 5.5 AG Grid 컬럼 추가
 
-`ProductModelGrid.tsx` → `columnDefs` 배열에 ColDef 추가:
+`ProductModelGrid.jsx` → `columnDefs` 배열에 컬럼 정의 추가:
 
-```typescript
+```javascript
 { field: 'newField', headerName: '새 컬럼', width: 120 }
 ```
 
@@ -210,7 +208,7 @@ openModelDetail(model)
 | `models` | useProductModels | Grid 품목 목록 |
 | `categoryTab` | App | 전체/전자기기/가구 |
 | `productStockOnly` | App | 재고 > 0 상품 필터 |
-| `modelStock10Plus` | App | 재고 ≥ 10 품목 필터 |
+| `alwaysExpanded` | App | 상품 카드 그룹 항상 펼침 여부 |
 | `selectedProductId` | App | 선택된 상품 |
 | `productForm` / `modelForm` | App | CRUD 입력값 |
 | `detailModel` | App | Modal 표시 품목 |
@@ -222,7 +220,7 @@ openModelDetail(model)
 | 명령 | 설명 |
 |------|------|
 | `npm run dev` | 개발 서버 (5173) |
-| `npm run build` | TypeScript 검사 + `dist/` 빌드 |
+| `npm run build` | Vite production build (`dist/`) |
 | `npm run preview` | 빌드 결과 미리보기 |
 
 ---
@@ -232,7 +230,7 @@ openModelDetail(model)
 ### UI 기능 추가 시
 
 - [ ] Backend API 존재·동작 확인
-- [ ] `api.ts` 타입·함수 추가
+- [ ] `api.js` 함수 추가
 - [ ] Hook 또는 App state 연동
 - [ ] Component 분리 (재사용 가능하면 `components/`)
 - [ ] `index.css` 스타일 추가
@@ -240,7 +238,7 @@ openModelDetail(model)
 
 ### 배포·공유 전
 
-- [ ] `npm run build` 성공 (tsc 오류 없음)
+- [ ] `npm run build` 성공
 - [ ] Backend(8081) + Frontend(5173) 연동 확인
 - [ ] Tab / Grid / Modal / CRUD 시나리오 테스트
 
@@ -265,8 +263,8 @@ openModelDetail(model)
 | 파일명 | PascalCase (컴ponent), camelCase (hook/util) |
 | Hook | `use` 접두사 필수 |
 | API | `productsApi`, `productModelsApi` 객체로 그룹화 |
-| 타입 | `interface` / `type`, Payload는 `Omit<>` 활용 |
-| 주석 | 파일 상단 + App.tsx 섹션 주석 (한국어) |
+| 데이터 | API 응답 필드명은 Backend JSON과 동일하게 유지 |
+| 주석 | 파일 상단 + App.jsx 섹션 주석 (한국어) |
 | CSS | `index.css`, BEM 유사 className |
 
 ---

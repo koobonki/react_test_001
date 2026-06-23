@@ -23,7 +23,7 @@ cd react_test_001
 
 1. IntelliJ → **Open** → `backend` 폴더
 2. JDK **17** 설정 (File → Project Structure → SDK)
-3. Gradle import 완료 후 **DemoApplication** Run ▶
+3. Maven import 완료 후 **DemoApplication** Run ▶
 4. API 확인: http://localhost:8081/api/products
 
 → 자세히: [backend/README.md](./backend/README.md)
@@ -49,8 +49,8 @@ cd react_test_001
 
 | 구분 | 기술 | 포트 |
 |------|------|------|
-| **Frontend** | React 18, TypeScript, Vite, AG Grid | **5173** |
-| **Backend** | Spring Boot 3.2, Spring Data JPA, Gradle, Java 17 | **8081** |
+| **Frontend** | React 18, JavaScript, Vite, AG Grid | **5173** |
+| **Backend** | Spring Boot 3.2, Spring Data JPA, Maven, Java 17 | **8081** |
 | **DB** | H2 파일 DB (`backend/data/demo-db.mv.db`, Git 포함) | 내장 |
 
 ---
@@ -60,7 +60,7 @@ cd react_test_001
 ```powershell
 # Backend
 cd backend
-.\gradlew.bat bootRun
+mvn spring-boot:run
 
 # Frontend (새 터미널)
 cd frontend
@@ -72,8 +72,8 @@ npm run dev
 
 ## 화면 기능
 
-1. **카테고리 Tab** — 전체 / 전자기기 / 가구 필터
-2. **상품 카드** — 아이콘 카드 클릭 → 상품 선택 + CRUD 폼
+1. **카테고리 Tab** — API로 조회한 카테고리와 상품 카드 표시
+2. **상품 카드** — 한 줄 5개 아이콘 카드 + 펼침/접힘 버튼, 카드 클릭 → 상품 선택 + CRUD 폼
 3. **상품/품목 CRUD** — REST API 연동
 4. **AG Grid** — 화면 시작 시 전체 품목 표시 (최하단)
 5. **Modal** — Grid 행 클릭 → 품목 상세
@@ -118,6 +118,7 @@ npm run dev
 ## 사전 요구사항
 
 - Java 17+ (Backend / IntelliJ)
+- Maven 3.9+ (Backend CLI)
 - Node.js 18+ (Frontend / VS Code)
 - IntelliJ IDEA, Visual Studio Code
 

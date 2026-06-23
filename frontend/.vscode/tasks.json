@@ -33,7 +33,7 @@
       "type": "npm",
       "script": "build",
       "path": "${workspaceFolder}",
-      "problemMatcher": ["$tsc"]
+      "problemMatcher": []
     }
   ]
 }

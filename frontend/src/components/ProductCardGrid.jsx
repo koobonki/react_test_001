@@ -1,13 +1,14 @@
 /**
  * 상품 카드 그리드 컴포넌트.
  *
- * Tab으로 필터된 상품 목록을 아이콘 카드(5열)로 표시합니다.
+ * Tab으로 조회된 상품 목록을 아이콘 카드(5열)로 표시합니다.
+ * 접힌 상태에서는 첫 줄 5개만 보여주고, 버튼/토글로 전체 목록을 펼칩니다.
  * 카드 클릭 → onSelect(product) → App에서 상품 선택 + 품목 로드
  */
-import type { Product } from '../api';
+const COLLAPSED_CARD_COUNT = 5;
 
 /** 상품명에 맞는 이모지 (DB가 아닌 Frontend 하드코딩) */
-const PRODUCT_ICONS: Record<string, string> = {
+const PRODUCT_ICONS = {
   노트북: '💻',
   '무선 마우스': '🖱️',
   '기계식 키보드': '⌨️',
@@ -16,34 +17,26 @@ const PRODUCT_ICONS: Record<string, string> = {
 };
 
 /** 상품명 매칭 실패 시 카테고리별 기본 아이콘 */
-const CATEGORY_ICONS: Record<string, string> = {
+const CATEGORY_ICONS = {
   전자기기: '📱',
   가구: '🛋️',
 };
 
 const DEFAULT_ICON = '📦';
 
-function getProductIcon(name: string, category: string) {
+function getProductIcon(name, category) {
   return PRODUCT_ICONS[name] ?? CATEGORY_ICONS[category] ?? DEFAULT_ICON;
 }
-
-type CategoryTab = '전체' | '전자기기' | '가구';
-
-type ProductCardGridProps = {
-  products: Product[];
-  selectedId: number | null;
-  loading: boolean;
-  activeCategory: CategoryTab;
-  onSelect: (product: Product) => void;
-};
 
 export function ProductCardGrid({
   products,
   selectedId,
   loading,
   activeCategory,
+  expanded,
+  onToggleExpanded,
   onSelect,
-}: ProductCardGridProps) {
+}) {
   if (loading) {
     return <div className="product-grid-state">상품을 불러오는 중...</div>;
   }
@@ -56,15 +49,19 @@ export function ProductCardGrid({
     return <div className="product-grid-state">{emptyMessage}</div>;
   }
 
+  const hasOverflow = products.length > COLLAPSED_CARD_COUNT;
+  const visibleProducts = expanded ? products : products.slice(0, COLLAPSED_CARD_COUNT);
+  const hiddenCount = Math.max(products.length - COLLAPSED_CARD_COUNT, 0);
+
   return (
     <>
       <p className="product-grid-caption">
         {activeCategory === '전체'
-          ? `전체 ${products.length}개 상품`
-          : `${activeCategory} · ${products.length}개 상품`}
+          ? `전체 ${visibleProducts.length}/${products.length}개 상품`
+          : `${activeCategory} · ${visibleProducts.length}/${products.length}개 상품`}
       </p>
       <div className="product-card-grid">
-        {products.map((product) => (
+        {visibleProducts.map((product) => (
           <button
             key={product.id}
             type="button"
@@ -81,6 +78,13 @@ export function ProductCardGrid({
           </button>
         ))}
       </div>
+      {hasOverflow && (
+        <div className="product-grid-expand">
+          <button type="button" className="secondary" onClick={onToggleExpanded}>
+            {expanded ? '한 줄로 접기' : `전체 펼치기 (+${hiddenCount})`}
+          </button>
+        </div>
+      )}
     </>
   );
 }

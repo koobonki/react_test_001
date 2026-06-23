@@ -12,8 +12,7 @@ backend/.idea/dataSources.local.xml
 target/
 node_modules/
 dist/
-backend/build/
-backend/.gradle/
+backend/target/
 
 # H2 DB — demo-db.mv.db 는 Git에 포함 (pull 후 바로 사용)
 backend/data/*.trace.db

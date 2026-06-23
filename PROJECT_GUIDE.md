@@ -34,8 +34,9 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 ## 3. 실행 체크리스트
 
 - [ ] Java 17 설치 확인 (`java -version`)
+- [ ] Maven 설치 확인 (`mvn -v`)
 - [ ] Node.js 18+ 설치 확인 (`node -v`)
-- [ ] Backend: `cd backend && .\gradlew.bat bootRun`
+- [ ] Backend: `cd backend && mvn spring-boot:run`
 - [ ] http://localhost:8081/api/products → JSON 배열 확인
 - [ ] Frontend: `cd frontend && npm run dev`
 - [ ] http://localhost:5173 → Tab + 카드 + AG Grid 확인
@@ -69,7 +70,7 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 ### 토글 필터
 
 - **상품재고**: 재고 0인 상품 카드 숨김
-- **재고10개 이상**: Grid에서 재고 10 미만 품목 숨김
+- **항상 펼침**: 상품 카드 그룹을 전체 펼침 상태로 표시
 
 ---
 
@@ -77,7 +78,7 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 
 | UI 동작 | Frontend | Backend |
 |---------|----------|---------|
-| 앱 시작 | `productsApi.list()` | `ProductController.findAll()` |
+| 앱 시작 | `productsApi.categories()` + `productsApi.list()` | `ProductController.findCategories()` + `findAll()` |
 | 카드 클릭 | `productsApi.get(id)` | `ProductController.findById()` |
 | POST 등록 | `productsApi.create()` | `ProductController.create()` |
 | Grid 품목 | `productModelsApi.list()` | `ProductModelController.findAll()` |
@@ -98,12 +99,12 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 
 ## 7. Frontend 핵심 파일 읽는 순서
 
-1. `main.tsx` — 진입점
-2. `api.ts` — API 타입·호출
-3. `hooks/useProducts.ts` — 상품 Hook
-4. `App.tsx` — 전체 UI·로직
-5. `ProductCardGrid.tsx` — 카드 UI
-6. `ProductModelGrid.tsx` — AG Grid
+1. `main.jsx` — 진입점
+2. `api.js` — API 호출
+3. `hooks/useProducts.js` — 상품 Hook
+4. `App.jsx` — 전체 UI·로직
+5. `ProductCardGrid.jsx` — 카드 UI
+6. `ProductModelGrid.jsx` — AG Grid
 
 ---
 
@@ -111,7 +112,7 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모의 학습용 종
 
 | 증상 | 원인 | 해결 |
 |------|------|------|
-| `Backend에 연결할 수 없습니다` | Backend 미실행 | `gradlew bootRun` |
+| `Backend에 연결할 수 없습니다` | Backend 미실행 | `mvn spring-boot:run` |
 | Grid 비어 있음 | 품목 시드 없음 | Backend 재시작 |
 | H2 lock 오류 | Backend 중복 실행 | 8081 포트 프로세스 종료 |
 | Tab 클릭해도 변화 없음 | category 필드 비어 있음 | H2에서 products 확인 |
@@ -132,7 +133,7 @@ if ($p) { Stop-Process -Id $p -Force }
 # Backend 중지 후
 Remove-Item backend\data\demo-db.mv.db -ErrorAction SilentlyContinue
 cd backend
-.\gradlew.bat bootRun
+mvn spring-boot:run
 ```
 
 ---
@@ -143,7 +144,7 @@ cd backend
 
 - 클래스/파일 상단: 이 파일이 하는 일
 - 주요 메서드: HTTP 메서드, 호출 시점
-- App.tsx: JSX 섹션별 `{/* 1. Tab + 카드 */}` 주석
+- App.jsx: JSX 섹션별 `{/* 1. Tab + 카드 */}` 주석
 
 CSS(`index.css`)는 섹션별 구분 주석만 포함합니다.
 
@@ -151,7 +152,7 @@ CSS(`index.css`)는 섹션별 구분 주석만 포함합니다.
 
 ## 11. 확장 아이디어 (학습용)
 
-- [ ] 카테고리 Tab을 DB에서 동적으로 로드
+- [ ] 카테고리 관리 CRUD 화면 추가
 - [ ] JWT 로그인 추가
 - [ ] PostgreSQL 프로필 전환
 - [ ] 품목 전체 조회 API (`GET /api/models`) 추가

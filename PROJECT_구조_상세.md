@@ -22,7 +22,7 @@ Spring Boot 3 + React 18 풀스택 **상품·품목 관리** 데모의 아키텍
 ```mermaid
 flowchart TB
   subgraph Client["Browser (localhost:5173)"]
-    UI["React App (App.tsx)"]
+    UI["React App (App.jsx)"]
     AG["AG Grid"]
     UI --> AG
   end
@@ -55,12 +55,12 @@ flowchart TB
 
 | 구분 | 기술 | 버전/비고 |
 |------|------|-----------|
-| Frontend | React, TypeScript, Vite | 18, 5 |
+| Frontend | React, JavaScript, Vite | 18, 5 |
 | UI Grid | AG Grid Community | ag-grid-react |
 | Backend | Spring Boot, Spring Data JPA | 3.2.5 |
 | Language | Java | 17 |
 | DB | H2 (file mode) | embedded |
-| Build | Gradle, npm | — |
+| Build | Maven, npm | — |
 
 ### 2.2 포트·URL
 
@@ -88,9 +88,7 @@ react_test_001/
 │
 ├── backend/                       # ★ IntelliJ에서 Open
 │   ├── README.md
-│   ├── build.gradle
-│   ├── settings.gradle
-│   ├── gradlew.bat
+│   ├── pom.xml
 │   ├── data/
 │   │   └── demo-db.mv.db          # H2 DB (Git 포함)
 │   ├── scripts/
@@ -105,7 +103,7 @@ react_test_001/
 └── frontend/                      # ★ VS Code에서 Open
     ├── README.md
     ├── package.json
-    ├── vite.config.ts
+    ├── vite.config.js
     ├── .vscode/
     └── src/
 ```
@@ -171,6 +169,8 @@ erDiagram
 
 ```
 GET    /api/products
+GET    /api/products?category={category}&inStockOnly=true
+GET    /api/products/categories
 GET    /api/products/{id}
 POST   /api/products
 PUT    /api/products/{id}
@@ -214,24 +214,24 @@ DELETE /api/products/{productId}/models/{id}
 
 ```
 src/
-├── main.tsx              # createRoot → <App />
-├── App.tsx               # 상태·핸들러·JSX 조합 (459 lines)
-├── api.ts                # fetch 래퍼 + productsApi + productModelsApi
+├── main.jsx              # createRoot → <App />
+├── App.jsx               # 상태·핸들러·JSX 조합
+├── api.js                # fetch 래퍼 + productsApi + productModelsApi
 ├── index.css             # 전역·Tab·카드·Grid·Modal 스타일
 ├── hooks/
-│   ├── useProducts.ts    # 상품 list/get/create/update/delete
-│   └── useProductModels.ts  # load, loadAllForProducts, CRUD
+│   ├── useProducts.js    # 상품 list/get/create/update/delete
+│   └── useProductModels.js  # load, loadAllForProducts, CRUD
 ├── utils/
-│   ├── productForm.ts    # emptyProductForm, toProductForm
-│   └── modelForm.ts      # emptyModelForm, toModelForm
+│   ├── productForm.js    # emptyProductForm, toProductForm
+│   └── modelForm.js      # emptyModelForm, toModelForm
 └── components/
-    ├── ProductCardGrid.tsx    # Tab 필터 → 5열 카드
-    ├── ProductModelGrid.tsx   # AG Grid
-    ├── ModelDetailModal.tsx   # overlay Modal
-    └── ToggleSwitch.tsx       # 필터 UI
+    ├── ProductCardGrid.jsx    # Tab 필터 → 5열 카드
+    ├── ProductModelGrid.jsx   # AG Grid
+    ├── ModelDetailModal.jsx   # overlay Modal
+    └── ToggleSwitch.jsx       # 필터 UI
 ```
 
-### 5.2 App.tsx 상태 다이어그램
+### 5.2 App.jsx 상태 다이어그램
 
 ```mermaid
 stateDiagram-v2
@@ -258,7 +258,7 @@ stateDiagram-v2
 | `useProductModels.loadAllForProducts` | GET × N | 각 상품별 models |
 | `useProductModels.getById` | GET | `.../models/{id}` |
 
-### 5.4 vite.config.ts
+### 5.4 vite.config.js
 
 ```typescript
 server: {
@@ -278,15 +278,15 @@ server: {
 | **ProductCardGrid** | products, loading, activeCategory | 카드 클릭 → onSelect |
 | **ProductModelGrid** | models, title, showProductColumn | 행 클릭 → onSelect |
 | **ModelDetailModal** | model, productName | 닫기/수정 콜백 |
-| **ToggleSwitch** | label, checked, onChange | 재고 필터 |
+| **ToggleSwitch** | label, checked, onChange | 재고 필터, 카드 펼침 옵션 |
 
 ### 5.6 필터 로직
 
 | 필터 | State | 적용 대상 |
 |------|-------|----------|
-| Tab (전체/전자기기/가구) | `categoryTab` | `filteredProducts` (카드) |
+| Tab (전체/전자기기/가구) | `categoryTab` | category API + products API (카드) |
 | 상품재고 | `productStockOnly` | stock > 0 인 상품 |
-| 재고10개 이상 | `modelStock10Plus` | stock >= 10 인 품목 (Grid) |
+| 항상 펼침 | `alwaysExpanded` | ProductCardGrid 전체 표시 / 한 줄 표시 |
 
 ---
 
@@ -331,11 +331,11 @@ sequenceDiagram
 
 ---
 
-## 7. 데이터 모델 (TypeScript ↔ Java)
+## 7. 데이터 모델 (JavaScript ↔ Java)
 
 ### Product
 
-| 필드 | TS (`api.ts`) | Java (`Product.java`) |
+| 필드 | JS (`api.js`) | Java (`Product.java`) |
 |------|---------------|----------------------|
 | id | `number?` | `Long id` |
 | name | `string` | `String name` |
@@ -394,15 +394,15 @@ flowchart LR
 
 | 기능 | Backend | Frontend |
 |------|---------|----------|
-| 컬럼 추가 | Entity → Controller | api.ts → form → UI |
-| API 추가 | Controller → Repository | api.ts → Hook → App |
-| Tab 카테고리 | — | CATEGORY_TABS, filter |
+| 컬럼 추가 | Entity → Controller | api.js → form → UI |
+| API 추가 | Controller → Repository | api.js → Hook → App |
+| Tab 카테고리 | category API | productsApi.categories, productsApi.list |
 | Grid 컬럼 | — | ProductModelGrid columnDefs |
-| 인증(JWT) | Security Config | api.ts header, login UI |
+| 인증(JWT) | Security Config | api.js header, login UI |
 
 ---
 
 ## 11. 소스 주석
 
-모든 Java / TypeScript 소스 파일에 **초보자용 한국어 주석**이 포함되어 있습니다.  
+모든 Java / JavaScript 소스 파일에 **초보자용 한국어 주석**이 포함되어 있습니다.  
 파일·클래스·주요 메서드 상단에서 역할을 확인할 수 있습니다.

@@ -1,6 +1,6 @@
 # Frontend 상세 구조
 
-React + TypeScript + Vite + AG Grid 기반 SPA입니다.
+React + JavaScript + Vite + AG Grid 기반 SPA입니다.
 
 > **작업 가이드: [FRONTEND_작업지시서.md](./FRONTEND_작업지시서.md)** · **전체 구조: [PROJECT_구조_상세.md](./PROJECT_구조_상세.md)**
 ---
@@ -9,23 +9,23 @@ React + TypeScript + Vite + AG Grid 기반 SPA입니다.
 
 | 파일 | 한 줄 설명 |
 |------|-----------|
-| `main.tsx` | React 앱을 `#root`에 마운트 |
-| `App.tsx` | 전체 화면·상태·이벤트의 중심 |
-| `api.ts` | Backend REST API 호출 (fetch) |
-| `hooks/useProducts.ts` | 상품 목록/CRUD 상태 |
-| `hooks/useProductModels.ts` | 품목 목록/CRUD 상태 |
-| `utils/productForm.ts` | 상품 폼 ↔ API 데이터 변환 |
-| `utils/modelForm.ts` | 품목 폼 ↔ API 데이터 변환 |
-| `components/ProductCardGrid.tsx` | Tab 필터 결과 → 아이콘 카드 |
-| `components/ProductModelGrid.tsx` | AG Grid 품목 테이블 |
-| `components/ModelDetailModal.tsx` | 품목 상세 팝업 |
-| `components/ToggleSwitch.tsx` | 재고 필터 스위치 |
+| `main.jsx` | React 앱을 `#root`에 마운트 |
+| `App.jsx` | 전체 화면·상태·이벤트의 중심 |
+| `api.js` | Backend REST API 호출 (fetch) |
+| `hooks/useProducts.js` | 상품 목록/CRUD 상태 |
+| `hooks/useProductModels.js` | 품목 목록/CRUD 상태 |
+| `utils/productForm.js` | 상품 폼 ↔ API 데이터 변환 |
+| `utils/modelForm.js` | 품목 폼 ↔ API 데이터 변환 |
+| `components/ProductCardGrid.jsx` | Tab 조회 결과 → 아이콘 카드, 펼침/접힘 |
+| `components/ProductModelGrid.jsx` | AG Grid 품목 테이블 |
+| `components/ModelDetailModal.jsx` | 품목 상세 팝업 |
+| `components/ToggleSwitch.jsx` | 재고 필터 / 항상 펼침 스위치 |
 | `index.css` | className 스타일 |
-| `vite.config.ts` | dev 서버 + API 프록시 |
+| `vite.config.js` | dev 서버 + API 프록시 |
 
 ---
 
-## 2. App.tsx 화면 구성 (위 → 아래)
+## 2. App.jsx 화면 구성 (위 → 아래)
 
 ```
 ┌──────────────────────────────────────┐
@@ -57,13 +57,13 @@ React + TypeScript + Vite + AG Grid 기반 SPA입니다.
 | `loading` | API 로딩 중 |
 | `error` | API 오류 메시지 |
 
-### App.tsx 로컬 state
+### App.jsx 로컬 state
 
 | state | 설명 |
 |-------|------|
 | `categoryTab` | 선택된 Tab (전체/전자기기/가구) |
 | `productStockOnly` | 상품 재고 > 0 필터 |
-| `modelStock10Plus` | 품목 재고 ≥ 10 필터 |
+| `alwaysExpanded` | 상품 카드 그룹 항상 펼침 여부 |
 | `selectedProductId` | 클릭한 상품 ID |
 | `productForm` / `modelForm` | CRUD 입력값 |
 | `detailModel` | Modal에 표시할 품목 |
@@ -74,10 +74,9 @@ React + TypeScript + Vite + AG Grid 기반 SPA입니다.
 
 | 이름 | 역할 |
 |------|------|
-| `filteredProducts` | Tab + 재고 필터 적용된 상품 목록 |
-| `filteredModels` | 재고 10개 이상 필터 적용 품목 |
+| `products` | API로 조회한 현재 Tab의 상품 카드 목록 |
 | `gridModels` | Grid용 productName 컬럼 추가 |
-| `categoryCounts` | Tab 옆 개수 뱃지 |
+| `categories` | API로 조회한 Tab 이름과 개수 뱃지 |
 | mount `useEffect` | 시작 시 전체 Tab + 상품 로드 |
 | models `useEffect` | 상품 미선택 시 전체 품목 Grid 로드 |
 
@@ -87,11 +86,12 @@ React + TypeScript + Vite + AG Grid 기반 SPA입니다.
 
 브라우저 → `fetch('/api/products')` → Vite proxy → `http://localhost:8081/api/products`
 
-```typescript
-// api.ts
-productsApi.list()           // GET  /api/products
-productsApi.get(id)          // GET  /api/products/{id}
-productModelsApi.list(pid)   // GET  /api/products/{pid}/models
+```javascript
+// api.js
+productsApi.categories()                // GET  /api/products/categories
+productsApi.list({ category })          // GET  /api/products?category=...
+productsApi.get(id)                     // GET  /api/products/{id}
+productModelsApi.list(pid)              // GET  /api/products/{pid}/models
 ```
 
 ---
@@ -106,6 +106,8 @@ productModelsApi.list(pid)   // GET  /api/products/{pid}/models
 | selectedId | number \| null | 선택된 카드 강조 |
 | loading | boolean | 로딩 UI |
 | activeCategory | Tab | 안내 문구용 |
+| expanded | boolean | 전체 카드 펼침 여부 |
+| onToggleExpanded | () => void | 하단 펼침/접기 버튼 클릭 |
 | onSelect | (product) => void | 카드 클릭 |
 
 ### ProductModelGrid
@@ -132,7 +134,7 @@ productModelsApi.list(pid)   // GET  /api/products/{pid}/models
 
 1. **Backend 먼저 실행** — Frontend만 켜면 `Backend에 연결할 수 없습니다` 에러
 2. **HMR** — 코드 저장 시 화면 자동 갱신 (Vite)
-3. **주석** — 각 `.ts`/`.tsx` 파일 상단에 역할 설명 있음
+3. **주석** — 각 `.js`/`.jsx` 파일 상단에 역할 설명 있음
 4. **빌드** — `npm run build` → `dist/` 폴더 생성
 
 ---
@@ -144,4 +146,3 @@ productModelsApi.list(pid)   // GET  /api/products/{pid}/models
 | react, react-dom | UI |
 | ag-grid-react, ag-grid-community | Grid |
 | vite, @vitejs/plugin-react | 빌드·dev 서버 |
-| typescript | 타입 검사 |

@@ -26,9 +26,7 @@ Spring Boot 3 + React 풀스택 **상품/품목 관리** 데모입니다.
 
 ```
 backend/
-├── build.gradle                 # Gradle 의존성 (Spring Boot, JPA, H2)
-├── settings.gradle
-├── gradlew.bat
+├── pom.xml                      # Maven 의존성 (Spring Boot, JPA, H2)
 ├── data/
 │   └── demo-db.mv.db            # H2 DB 파일 (실행 시 생성)
 └── src/main/
@@ -89,24 +87,24 @@ backend/
 
 ```
 frontend/
-├── vite.config.ts       # dev 서버 5173, /api → 8081 프록시
+├── vite.config.js       # dev 서버 5173, /api → 8081 프록시
 ├── package.json
 └── src/
-    ├── main.tsx         # React 진입점
-    ├── App.tsx          # ★ 메인 UI + 상태 조합
-    ├── api.ts           # REST API 클라이언트
+    ├── main.jsx         # React 진입점
+    ├── App.jsx          # ★ 메인 UI + 상태 조합
+    ├── api.js           # REST API 클라이언트
     ├── index.css        # 전역 스타일
     ├── hooks/
-    │   ├── useProducts.ts
-    │   └── useProductModels.ts
+    │   ├── useProducts.js
+    │   └── useProductModels.js
     ├── utils/
-    │   ├── productForm.ts
-    │   └── modelForm.ts
+    │   ├── productForm.js
+    │   └── modelForm.js
     └── components/
-        ├── ProductCardGrid.tsx
-        ├── ProductModelGrid.tsx
-        ├── ModelDetailModal.tsx
-        └── ToggleSwitch.tsx
+        ├── ProductCardGrid.jsx
+        ├── ProductModelGrid.jsx
+        ├── ModelDetailModal.jsx
+        └── ToggleSwitch.jsx
 ```
 
 자세한 Frontend 설명 → [FRONTEND_STRUCTURE.md](./FRONTEND_STRUCTURE.md)
@@ -117,9 +115,9 @@ frontend/
 
 ### 화면 시작
 
-1. `App.tsx` → `useProducts.load()` → `GET /api/products`
+1. `App.jsx` → `useProducts.load()` → `GET /api/products`
 2. `useProductModels.loadAllForProducts()` → 각 상품별 `GET .../models` → AG Grid 25행
-3. Tab **전체** 선택 상태, 상품 카드 5개 표시
+3. Tab **전체** 선택 상태, 상품 카드 한 줄 5개 표시 (버튼/토글로 펼침)
 
 ### 상품 카드 클릭
 
@@ -142,7 +140,7 @@ frontend/
 
 ```powershell
 # Backend
-cd backend && .\gradlew.bat bootRun
+cd backend && mvn spring-boot:run
 
 # Frontend
 cd frontend && npm run dev
@@ -155,12 +153,12 @@ cd frontend && npm run dev
 | 파일 | 내용 |
 |------|------|
 | `backend/.../application.yml` | port 8081, H2 URL, SQL init |
-| `frontend/vite.config.ts` | port 5173, API proxy |
+| `frontend/vite.config.js` | port 5173, API proxy |
 | `backend/.../WebConfig.java` | CORS localhost:5173 |
 
 ---
 
 ## 7. 소스 코드 주석
 
-모든 Java / TypeScript 소스 파일 상단에 **초보자용 한국어 주석**이 포함되어 있습니다.  
+모든 Java / JavaScript 소스 파일 상단에 **초보자용 한국어 주석**이 포함되어 있습니다.  
 파일을 열면 해당 파일의 역할과 주요 함수 설명을 확인할 수 있습니다.
