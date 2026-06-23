@@ -208,7 +208,7 @@ openModelDetail(model)
 | `models` | useProductModels | Grid 품목 목록 |
 | `categoryTab` | App | 전체/전자기기/가구 |
 | `productStockOnly` | App | 재고 > 0 상품 필터 |
-| `modelStock10Plus` | App | 재고 ≥ 10 품목 필터 |
+| `alwaysExpanded` | App | 상품 카드 그룹 항상 펼침 여부 |
 | `selectedProductId` | App | 선택된 상품 |
 | `productForm` / `modelForm` | App | CRUD 입력값 |
 | `detailModel` | App | Modal 표시 품목 |

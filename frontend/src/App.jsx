@@ -62,7 +62,7 @@ function App() {
   const [detailModel, setDetailModel] = useState(null);
   const [categoryTab, setCategoryTab] = useState('전체');
   const [productStockOnly, setProductStockOnly] = useState(false);
-  const [modelStock10Plus, setModelStock10Plus] = useState(false);
+  const [alwaysExpanded, setAlwaysExpanded] = useState(false);
 
   const error = productsError ?? modelsError;
   const categoryTabs = categories.length > 0 ? categories : [{ name: '전체', count: products.length }];
@@ -100,19 +100,14 @@ function App() {
     resetProductForm();
   };
 
-  const filteredModels = useMemo(() => {
-    if (!modelStock10Plus) return models;
-    return models.filter((model) => model.stock >= 10);
-  }, [models, modelStock10Plus]);
-
   // AG Grid 행에 상품명 컬럼을 채우기 위한 데이터 가공
   const gridModels = useMemo(() => {
     const nameById = new Map(products.map((product) => [product.id, product.name]));
-    return filteredModels.map((model) => ({
+    return models.map((model) => ({
       ...model,
       productName: model.productId ? nameById.get(model.productId) ?? '' : '',
     }));
-  }, [filteredModels, products]);
+  }, [models, products]);
 
   const gridTitle = selectedProductName
     ? selectedProductName
@@ -289,9 +284,9 @@ function App() {
               }}
             />
             <ToggleSwitch
-              label="재고10개 이상"
-              checked={modelStock10Plus}
-              onChange={setModelStock10Plus}
+              label="항상 펼침"
+              checked={alwaysExpanded}
+              onChange={setAlwaysExpanded}
             />
           </div>
         </div>
@@ -300,6 +295,8 @@ function App() {
           selectedId={selectedProductId}
           loading={productsLoading}
           activeCategory={categoryTab}
+          expanded={alwaysExpanded}
+          onToggleExpanded={() => setAlwaysExpanded((expanded) => !expanded)}
           onSelect={selectProduct}
         />
       </div>

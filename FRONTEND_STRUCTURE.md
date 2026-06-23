@@ -16,10 +16,10 @@ React + JavaScript + Vite + AG Grid 기반 SPA입니다.
 | `hooks/useProductModels.js` | 품목 목록/CRUD 상태 |
 | `utils/productForm.js` | 상품 폼 ↔ API 데이터 변환 |
 | `utils/modelForm.js` | 품목 폼 ↔ API 데이터 변환 |
-| `components/ProductCardGrid.jsx` | Tab 필터 결과 → 아이콘 카드 |
+| `components/ProductCardGrid.jsx` | Tab 조회 결과 → 아이콘 카드, 펼침/접힘 |
 | `components/ProductModelGrid.jsx` | AG Grid 품목 테이블 |
 | `components/ModelDetailModal.jsx` | 품목 상세 팝업 |
-| `components/ToggleSwitch.jsx` | 재고 필터 스위치 |
+| `components/ToggleSwitch.jsx` | 재고 필터 / 항상 펼침 스위치 |
 | `index.css` | className 스타일 |
 | `vite.config.js` | dev 서버 + API 프록시 |
 
@@ -63,7 +63,7 @@ React + JavaScript + Vite + AG Grid 기반 SPA입니다.
 |-------|------|
 | `categoryTab` | 선택된 Tab (전체/전자기기/가구) |
 | `productStockOnly` | 상품 재고 > 0 필터 |
-| `modelStock10Plus` | 품목 재고 ≥ 10 필터 |
+| `alwaysExpanded` | 상품 카드 그룹 항상 펼침 여부 |
 | `selectedProductId` | 클릭한 상품 ID |
 | `productForm` / `modelForm` | CRUD 입력값 |
 | `detailModel` | Modal에 표시할 품목 |
@@ -75,7 +75,6 @@ React + JavaScript + Vite + AG Grid 기반 SPA입니다.
 | 이름 | 역할 |
 |------|------|
 | `products` | API로 조회한 현재 Tab의 상품 카드 목록 |
-| `filteredModels` | 재고 10개 이상 필터 적용 품목 |
 | `gridModels` | Grid용 productName 컬럼 추가 |
 | `categories` | API로 조회한 Tab 이름과 개수 뱃지 |
 | mount `useEffect` | 시작 시 전체 Tab + 상품 로드 |
@@ -107,6 +106,8 @@ productModelsApi.list(pid)              // GET  /api/products/{pid}/models
 | selectedId | number \| null | 선택된 카드 강조 |
 | loading | boolean | 로딩 UI |
 | activeCategory | Tab | 안내 문구용 |
+| expanded | boolean | 전체 카드 펼침 여부 |
+| onToggleExpanded | () => void | 하단 펼침/접기 버튼 클릭 |
 | onSelect | (product) => void | 카드 클릭 |
 
 ### ProductModelGrid

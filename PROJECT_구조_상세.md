@@ -278,7 +278,7 @@ server: {
 | **ProductCardGrid** | products, loading, activeCategory | 카드 클릭 → onSelect |
 | **ProductModelGrid** | models, title, showProductColumn | 행 클릭 → onSelect |
 | **ModelDetailModal** | model, productName | 닫기/수정 콜백 |
-| **ToggleSwitch** | label, checked, onChange | 재고 필터 |
+| **ToggleSwitch** | label, checked, onChange | 재고 필터, 카드 펼침 옵션 |
 
 ### 5.6 필터 로직
 
@@ -286,7 +286,7 @@ server: {
 |------|-------|----------|
 | Tab (전체/전자기기/가구) | `categoryTab` | category API + products API (카드) |
 | 상품재고 | `productStockOnly` | stock > 0 인 상품 |
-| 재고10개 이상 | `modelStock10Plus` | stock >= 10 인 품목 (Grid) |
+| 항상 펼침 | `alwaysExpanded` | ProductCardGrid 전체 표시 / 한 줄 표시 |
 
 ---
 

@@ -1,7 +1,7 @@
 /**
  * 토글 스위치 UI (체크박스를 스위치 모양으로 표시).
  *
- * App.jsx에서 "상품재고", "재고10개 이상" 필터에 사용합니다.
+ * App.jsx에서 "상품재고", "항상 펼침" 옵션에 사용합니다.
  */
 export function ToggleSwitch({ label, checked, onChange }) {
   return (

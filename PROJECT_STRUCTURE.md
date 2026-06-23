@@ -117,7 +117,7 @@ frontend/
 
 1. `App.jsx` → `useProducts.load()` → `GET /api/products`
 2. `useProductModels.loadAllForProducts()` → 각 상품별 `GET .../models` → AG Grid 25행
-3. Tab **전체** 선택 상태, 상품 카드 5개 표시
+3. Tab **전체** 선택 상태, 상품 카드 한 줄 5개 표시 (버튼/토글로 펼침)
 
 ### 상품 카드 클릭
 
