@@ -14,11 +14,20 @@ export function useProducts() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  /** GET /api/products/categories — 카테고리 Tab 목록 새로고침 */
+  /**
+   * GET /api/products/categories — 카테고리 Tab 목록 새로고침.
+   *
+   * 흐름:
+   * 1. productsApi.categories(options)가 Backend API를 호출합니다.
+   * 2. Backend는 products 테이블의 category 컬럼을 그룹화해 [{ name, count }]를 응답합니다.
+   * 3. setCategories(...)로 응답을 React state에 저장합니다.
+   * 4. App.jsx는 categories state를 map 돌려 실제 Tab 버튼으로 렌더링합니다.
+   */
   const loadCategories = useCallback(async (options) => {
     setCategoriesLoading(true);
     setError(null);
     try {
+      // 여기서 받은 데이터가 App.jsx의 categoryTabs → <button role="tab">로 들어갑니다.
       setCategories(await productsApi.categories(options));
     } catch (e) {
       setError(e instanceof Error ? e.message : '카테고리 목록을 불러오지 못했습니다.');
@@ -27,11 +36,21 @@ export function useProducts() {
     }
   }, []);
 
-  /** GET /api/products — 전체 또는 카테고리별 상품 목록 새로고침 */
+  /**
+   * GET /api/products — 전체 또는 카테고리별 상품 목록 새로고침.
+   *
+   * 흐름:
+   * 1. App.jsx가 현재 선택 Tab(categoryTab)과 상품재고 토글(productStockOnly)을 넘깁니다.
+   * 2. productsApi.list(options)가 /api/products?category=... URL을 호출합니다.
+   * 3. Backend가 products 테이블에서 조건에 맞는 상품만 조회합니다.
+   * 4. setProducts(...)로 응답을 저장합니다.
+   * 5. App.jsx가 이 products state를 ProductCardGrid의 products prop으로 넣습니다.
+   */
   const load = useCallback(async (options) => {
     setLoading(true);
     setError(null);
     try {
+      // 여기서 받은 데이터가 ProductCardGrid에 표시되는 아이콘 카드 목록입니다.
       setProducts(await productsApi.list(options));
     } catch (e) {
       setError(e instanceof Error ? e.message : '상품 목록을 불러오지 못했습니다.');

@@ -65,9 +65,24 @@ function App() {
   const [alwaysExpanded, setAlwaysExpanded] = useState(false);
 
   const error = productsError ?? modelsError;
+
+  // categories는 useProducts.loadCategories()가 Backend에서 받아온 Tab 데이터입니다.
+  // 예: [{ name: '전체', count: 7 }, { name: '전자기기', count: 3 }, ...]
+  // API 응답이 아직 도착하지 않은 첫 렌더링 순간에는 최소한 "전체" Tab이 보이도록 fallback을 둡니다.
   const categoryTabs = categories.length > 0 ? categories : [{ name: '전체', count: products.length }];
 
   const refreshProductQueries = useCallback(async () => {
+    // category Tab 영역과 ProductCardGrid 영역은 서로 다른 API를 호출합니다.
+    //
+    // 1) loadCategories(...)
+    //    → GET /api/products/categories
+    //    → products.category를 그룹화한 Tab 이름/개수 조회
+    //
+    // 2) loadProducts(...)
+    //    → GET /api/products?category=현재Tab&inStockOnly=토글값
+    //    → ProductCardGrid에 넣을 상품 카드 목록 조회
+    //
+    // 두 요청은 서로 독립적이므로 Promise.all로 동시에 실행합니다.
     await Promise.all([
       loadCategories({ inStockOnly: productStockOnly }),
       loadProducts({ category: categoryTab, inStockOnly: productStockOnly }),
@@ -259,6 +274,10 @@ function App() {
       <div className="grid-panel">
         <div className="category-tabs-bar">
           <div className="category-tabs" role="tablist" aria-label="카테고리">
+            {/* categoryTabs는 Backend의 /api/products/categories 응답입니다.
+               여기서 map으로 돌면서 각 항목을 실제 Tab 버튼으로 넣습니다.
+               tab.name  → 버튼 라벨("전체", "전자기기", "가구")
+               tab.count → 오른쪽 작은 개수 뱃지 */}
             {categoryTabs.map((tab) => (
               <button
                 key={tab.name}
@@ -291,6 +310,10 @@ function App() {
           </div>
         </div>
         <ProductCardGrid
+          /* products는 Backend의 /api/products 응답입니다.
+             categoryTab이 "전자기기"이면 /api/products?category=전자기기 결과가 들어오고,
+             "상품재고"가 ON이면 inStockOnly=true 조건까지 적용된 결과가 들어옵니다.
+             ProductCardGrid는 별도 DB 조회를 하지 않고 이 배열을 그대로 아이콘 카드로 표시합니다. */
           products={products}
           selectedId={selectedProductId}
           loading={productsLoading}
