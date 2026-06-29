@@ -19,6 +19,8 @@ export const MaterialListGrid = forwardRef<AgGridReact<Material>, MaterialListGr
   function MaterialListGrid({ materials, selectedId, loading, onRowSelect }, ref) {
     const columnDefs = useMemo<ColDef<Material>[]>(
       () => [
+        { field: 'groupCode', headerName: '자재그룹코드', width: 110 },
+        { field: 'groupName', headerName: '자재그룹', width: 110 },
         { field: 'materialCode', headerName: '코드', width: 110 },
         { field: 'materialName', headerName: '자재명', flex: 1, minWidth: 120 },
         { field: 'category', headerName: '구분', width: 90 },

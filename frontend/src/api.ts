@@ -37,6 +37,8 @@ export type ProductModelPayload = Omit<ProductModel, 'id' | 'productId'>;
 /** 자재 1건의 타입 */
 export interface Material {
   id?: number;
+  groupCode: string;
+  groupName: string;
   materialCode: string;
   materialName: string;
   category: string;

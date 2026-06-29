@@ -940,6 +940,38 @@ button.danger:hover {
   cursor: not-allowed;
 }
 
+.material-search-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.material-search-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: #495057;
+}
+
+.material-search-filters select,
+.material-search-filters input {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.material-search-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
 .material-list-wrap {
   min-height: 280px;
 }

@@ -14,6 +14,12 @@ public class Material {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** 자재그룹코드 */
+    private String groupCode;
+
+    /** 자재그룹명 */
+    private String groupName;
+
     private String materialCode;
 
     private String materialName;
@@ -39,6 +45,8 @@ public class Material {
     }
 
     public Material(
+            String groupCode,
+            String groupName,
             String materialCode,
             String materialName,
             String category,
@@ -48,6 +56,8 @@ public class Material {
             String location,
             Integer stock,
             String remark) {
+        this.groupCode = groupCode;
+        this.groupName = groupName;
         this.materialCode = materialCode;
         this.materialName = materialName;
         this.category = category;
@@ -65,6 +75,22 @@ public class Material {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getGroupCode() {
+        return groupCode;
+    }
+
+    public void setGroupCode(String groupCode) {
+        this.groupCode = groupCode;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public String getMaterialCode() {

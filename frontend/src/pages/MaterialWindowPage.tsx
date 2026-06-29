@@ -1,12 +1,13 @@
 /**
  * 자재 조회 전용 화면 — MegaMenu 클릭 시 새 창으로 열립니다.
- * 좌: 자재 List / 우: combobox·textbox 상세 + 신규·수정·저장
+ * 좌: 조회 조건 + 자재 List / 우: combobox·textbox 상세 + 신규·수정·저장
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AgGridReact } from 'ag-grid-react';
 import type { Material, MaterialPayload } from '../api';
 import { materialsApi } from '../api';
 import { MaterialListGrid } from '../components/MaterialListGrid';
+import { findGroupByCode, findGroupByName, MATERIAL_GROUPS } from '../config/materialGroups';
 import { useMaterials } from '../hooks/useMaterials';
 
 const CATEGORY_OPTIONS = ['원자재', '부자재', '포장재', '소모품'];
@@ -15,7 +16,21 @@ const STATUS_OPTIONS = ['사용', '단종', '검토중'];
 
 type DetailMode = 'view' | 'edit' | 'new';
 
+type SearchCriteria = {
+  groupCode: string;
+  materialCode: string;
+  categoryLike: string;
+};
+
+const emptySearchCriteria: SearchCriteria = {
+  groupCode: '',
+  materialCode: '',
+  categoryLike: '',
+};
+
 const emptyDetail: Material = {
+  groupCode: '',
+  groupName: '',
   materialCode: '',
   materialName: '',
   category: '',
@@ -29,6 +44,8 @@ const emptyDetail: Material = {
 
 function toPayload(material: Material): MaterialPayload {
   return {
+    groupCode: material.groupCode.trim(),
+    groupName: material.groupName.trim(),
     materialCode: material.materialCode.trim(),
     materialName: material.materialName.trim(),
     category: material.category,
@@ -45,6 +62,10 @@ export default function MaterialWindowPage() {
   const { materials, loading, error, load } = useMaterials();
   const gridRef = useRef<AgGridReact<Material>>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [filterGroupCode, setFilterGroupCode] = useState('');
+  const [filterMaterialCode, setFilterMaterialCode] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>(emptySearchCriteria);
   const [detail, setDetail] = useState<Material>(emptyDetail);
   const [mode, setMode] = useState<DetailMode>('view');
   const [detailLoading, setDetailLoading] = useState(false);
@@ -54,6 +75,29 @@ export default function MaterialWindowPage() {
   const isEditable = mode === 'edit' || mode === 'new';
   const showForm = isEditable || selectedId !== null;
 
+  const filteredMaterials = useMemo(() => {
+    return materials.filter((material) => {
+      if (searchCriteria.groupCode && material.groupCode !== searchCriteria.groupCode) return false;
+      if (searchCriteria.materialCode && material.materialCode !== searchCriteria.materialCode) return false;
+      if (searchCriteria.categoryLike) {
+        const keyword = searchCriteria.categoryLike.trim().toLowerCase();
+        if (!material.category.toLowerCase().includes(keyword)) return false;
+      }
+      return true;
+    });
+  }, [materials, searchCriteria]);
+
+  const materialNameOptions = useMemo(() => {
+    const list = filterGroupCode
+      ? materials.filter((material) => material.groupCode === filterGroupCode)
+      : materials;
+
+    return list.map((material) => ({
+      value: material.materialCode,
+      label: material.materialName,
+    }));
+  }, [materials, filterGroupCode]);
+
   useEffect(() => {
     document.title = '자재 조회';
   }, []);
@@ -62,9 +106,56 @@ export default function MaterialWindowPage() {
     setDetail((prev) => ({ ...prev, [field]: value }));
   };
 
+  const clearSelection = () => {
+    gridRef.current?.api?.deselectAll();
+    setSelectedId(null);
+    setDetail({ ...emptyDetail });
+    setMode('view');
+  };
+
+  const handleFilterGroupChange = (groupCode: string) => {
+    setFilterGroupCode(groupCode);
+    setFilterMaterialCode('');
+  };
+
+  const handleFilterMaterialChange = (materialCode: string) => {
+    setFilterMaterialCode(materialCode);
+  };
+
+  const handleSearch = () => {
+    setSearchCriteria({
+      groupCode: filterGroupCode,
+      materialCode: filterMaterialCode,
+      categoryLike: filterCategory,
+    });
+    clearSelection();
+  };
+
+  const handleDetailGroupCodeChange = (groupCode: string) => {
+    const matched = findGroupByCode(groupCode);
+    setDetail((prev) => ({
+      ...prev,
+      groupCode,
+      groupName: matched?.groupName ?? '',
+    }));
+  };
+
+  const handleDetailGroupNameChange = (groupName: string) => {
+    const matched = findGroupByName(groupName);
+    setDetail((prev) => ({
+      ...prev,
+      groupName,
+      groupCode: matched?.groupCode ?? '',
+    }));
+  };
+
   const handleRefresh = async () => {
     gridRef.current?.api?.deselectAll();
     setSelectedId(null);
+    setFilterGroupCode('');
+    setFilterMaterialCode('');
+    setFilterCategory('');
+    setSearchCriteria(emptySearchCriteria);
     setDetail({ ...emptyDetail });
     setMode('view');
     setDetailError(null);
@@ -92,6 +183,7 @@ export default function MaterialWindowPage() {
   const handleNew = () => {
     setMode('new');
     setSelectedId(null);
+    gridRef.current?.api?.deselectAll();
     setDetail({ ...emptyDetail });
     setDetailError(null);
   };
@@ -137,7 +229,7 @@ export default function MaterialWindowPage() {
       <header className="material-window-header">
         <div>
           <h1>자재 조회</h1>
-          <p className="subtitle">좌측 목록 선택 시 우측에 상세 정보가 표시됩니다.</p>
+          <p className="subtitle">조회 조건 입력 후 조회 버튼을 클릭하세요.</p>
         </div>
         <button type="button" className="secondary" onClick={() => void handleRefresh()}>
           새로고침
@@ -151,10 +243,57 @@ export default function MaterialWindowPage() {
       <div className="material-window-body">
         <section className="material-list-panel">
           <h2 className="section-title">자재 List</h2>
+          <div className="material-search-filters">
+            <label>
+              자재그룹
+              <select
+                value={filterGroupCode}
+                onChange={(e) => handleFilterGroupChange(e.target.value)}
+              >
+                <option value="">전체</option>
+                {MATERIAL_GROUPS.map((group) => (
+                  <option key={group.groupCode} value={group.groupCode}>
+                    {group.groupName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              자재명
+              <select
+                value={filterMaterialCode}
+                onChange={(e) => handleFilterMaterialChange(e.target.value)}
+              >
+                <option value="">전체</option>
+                {materialNameOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              구분
+              <input
+                type="text"
+                value={filterCategory}
+                placeholder="부분 일치 검색"
+                onChange={(e) => setFilterCategory(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSearch();
+                }}
+              />
+            </label>
+          </div>
+          <div className="material-search-actions">
+            <button type="button" onClick={handleSearch}>
+              조회
+            </button>
+          </div>
           <div className="material-list-wrap">
             <MaterialListGrid
               ref={gridRef}
-              materials={materials}
+              materials={filteredMaterials}
               selectedId={selectedId}
               loading={loading}
               onRowSelect={(material) => void handleRowClick(material)}
@@ -193,6 +332,36 @@ export default function MaterialWindowPage() {
             <p className="material-list-state">왼쪽 목록에서 자재를 선택하거나 신규를 눌러 등록하세요.</p>
           ) : (
             <div className="material-detail-form">
+              <label>
+                자재그룹코드
+                <select
+                  value={detail.groupCode}
+                  disabled={!isEditable}
+                  onChange={(e) => handleDetailGroupCodeChange(e.target.value)}
+                >
+                  <option value="">선택</option>
+                  {MATERIAL_GROUPS.map((group) => (
+                    <option key={group.groupCode} value={group.groupCode}>
+                      {group.groupCode}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                자재그룹
+                <select
+                  value={detail.groupName}
+                  disabled={!isEditable}
+                  onChange={(e) => handleDetailGroupNameChange(e.target.value)}
+                >
+                  <option value="">선택</option>
+                  {MATERIAL_GROUPS.map((group) => (
+                    <option key={group.groupCode} value={group.groupName}>
+                      {group.groupName}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label>
                 자재코드
                 <input

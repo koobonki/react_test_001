@@ -46,6 +46,8 @@ public class MaterialController {
         Material existing = materialRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Material not found"));
 
+        existing.setGroupCode(material.getGroupCode());
+        existing.setGroupName(material.getGroupName());
         existing.setMaterialCode(material.getMaterialCode());
         existing.setMaterialName(material.getMaterialName());
         existing.setCategory(material.getCategory());
