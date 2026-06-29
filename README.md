@@ -1,88 +1,75 @@
 # Spring Boot 3 + React (AG Grid) 데모
 
-로컬 개발/학습용 풀스택 **상품·품목 관리** 샘플 프로젝트입니다.
+> **최종 수정일:** 2026-06-29
 
-> **문서**
-> - [PROJECT_구조_상세.md](./PROJECT_구조_상세.md) — 아키텍처·디렉터리·API 상세
-> - [BACKEND_작업지시서.md](./BACKEND_작업지시서.md) — Backend(IntelliJ) 작업 가이드
-> - [FRONTEND_작업지시서.md](./FRONTEND_작업지시서.md) — Frontend(VS Code) 작업 가이드
-> - [PROJECT_GUIDE.md](./PROJECT_GUIDE.md) · [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) · [FRONTEND_STRUCTURE.md](./FRONTEND_STRUCTURE.md)
+로컬 개발/테스트용 풀스택 샘플 프로젝트입니다.
 
----
+## 로컬 DB 제안
 
-## Git clone 후 바로 실행 (IntelliJ + VS Code)
+### 1. H2 (권장 - 이 프로젝트에 적용됨)
 
-### 1. Clone
+| 항목 | 내용 |
+|------|------|
+| 장점 | 별도 설치 없음, Spring Boot 기본 지원, 파일/메모리 모드 선택 가능 |
+| 용도 | 빠른 프로토타이핑, 단위/통합 테스트, 로컬 CRUD 개발 |
+| 콘솔 | http://localhost:8080/h2-console |
+| JDBC URL | `jdbc:h2:file:./data/demo-db` |
+| 계정 | `sa` / (비밀번호 없음) |
 
-```powershell
-git clone https://github.com/koobonki/react_test_001.git
-cd react_test_001
+### 2. PostgreSQL (Docker) - 운영 DB와 유사한 환경
+
+```bash
+docker run --name local-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=demo -p 5432:5432 -d postgres:16
 ```
 
-### 2. Backend — IntelliJ IDEA
+- 운영 환경과 동일한 SQL/타입을 쓰고 싶을 때 적합
+- `application.yml`의 datasource를 PostgreSQL로 변경하면 됨
 
-1. IntelliJ → **Open** → `backend` 폴더
-2. JDK **17** 설정 (File → Project Structure → SDK)
-3. Gradle import 완료 후 **DemoApplication** Run ▶
-4. API 확인: http://localhost:8081/api/products
+### 3. SQLite - 초경량 파일 DB
 
-→ 자세히: [backend/README.md](./backend/README.md)
+- 단일 파일로 관리, 임베드 앱/소규모 툴에 적합
+- Spring Boot에서도 사용 가능하나 JPA 호환성은 H2/PostgreSQL보다 제한적
 
-**DB:** `backend/data/demo-db.mv.db` 가 Git에 포함되어 있어 pull 후 **별도 DB 설정 없이** 바로 연결됩니다.
-
-### 3. Frontend — Visual Studio Code
-
-1. VS Code → **Open Folder** → `frontend` 폴더
-2. 터미inal: `npm install` → `npm run dev`
-3. UI: http://localhost:5173
-
-→ 자세히: [frontend/README.md](./frontend/README.md)
-
-| IDE | 폴더 | 실행 |
-|-----|------|------|
-| **IntelliJ** | `backend/` | Run **DemoApplication** |
-| **VS Code** | `frontend/` | `npm run dev` |
+**결론:** 로컬 개발·테스트에는 **H2**가 가장 편하고, 운영 DB와 맞추려면 **PostgreSQL Docker**를 추가로 사용하세요.
 
 ---
 
-## 기술 스택
+## 프로젝트 구조
 
-| 구분 | 기술 | 포트 |
-|------|------|------|
-| **Frontend** | React 18, TypeScript, Vite, AG Grid | **5173** |
-| **Backend** | Spring Boot 3.2, Spring Data JPA, Gradle, Java 17 | **8081** |
-| **DB** | H2 파일 DB (`backend/data/demo-db.mv.db`, Git 포함) | 내장 |
+```
+backend/     Spring Boot 3 + JPA + H2 REST API
+frontend/    React + TypeScript + AG Grid
+```
 
----
+## 사전 요구사항
 
-## CLI 실행 (IDE 없이)
+- Java 17+
+- Maven 3.8+
+- Node.js 18+
 
-```powershell
-# Backend
+## 실행 방법
+
+### 1. 백엔드
+
+```bash
 cd backend
-.\gradlew.bat bootRun
+mvn spring-boot:run
+```
 
-# Frontend (새 터미널)
+- API: http://localhost:8080/api/products
+- H2 Console: http://localhost:8080/h2-console
+
+### 2. 프론트엔드
+
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
----
+- UI: http://localhost:5173
 
-## 화면 기능
-
-1. **카테고리 Tab** — 전체 / 전자기기 / 가구 필터
-2. **상품 카드** — 아이콘 카드 클릭 → 상품 선택 + CRUD 폼
-3. **상품/품목 CRUD** — REST API 연동
-4. **AG Grid** — 화면 시작 시 전체 품목 표시 (최하단)
-5. **Modal** — Grid 행 클릭 → 품목 상세
-
----
-
-## REST API
-
-### 상품 `/api/products`
+## API 엔드포인트
 
 | Method | URL | 설명 |
 |--------|-----|------|
@@ -92,43 +79,9 @@ npm run dev
 | PUT | `/api/products/{id}` | 수정 |
 | DELETE | `/api/products/{id}` | 삭제 |
 
-### 품목 `/api/products/{productId}/models`
+## 기능
 
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `.../models` | 목록 조회 |
-| GET | `.../models/{id}` | 단건 조회 |
-| POST | `.../models` | 등록 |
-| PUT | `.../models/{id}` | 수정 |
-| DELETE | `.../models/{id}` | 삭제 |
-
----
-
-## DB 데이터
-
-| 파일 | 설명 |
-|------|------|
-| `backend/data/demo-db.mv.db` | **실제 H2 DB** (Git 포함, pull 후 즉시 사용) |
-| `backend/src/main/resources/db/data-snapshot.sql` | SQL 백업/복원용 |
-| `backend/src/main/resources/db/data-snapshot.json` | JSON 스냅샷 |
-| `backend/scripts/export-db-snapshot.mjs` | 실행 중 DB → 스냅샷 export |
-
----
-
-## 사전 요구사항
-
-- Java 17+ (Backend / IntelliJ)
-- Node.js 18+ (Frontend / VS Code)
-- IntelliJ IDEA, Visual Studio Code
-
----
-
-## 프로젝트 구조
-
-```
-react_test_001/
-├── backend/          Spring Boot + H2 DB (IntelliJ)
-├── frontend/         React + Vite (VS Code)
-├── react-demo.code-workspace
-└── README.md
-```
+- AG Grid로 상품 목록 표시 (정렬, 필터 기본 지원)
+- 행 클릭 시 폼에 데이터 로드 → 수정/삭제
+- 폼으로 신규 상품 등록
+- 시작 시 샘플 데이터 5건 자동 삽입

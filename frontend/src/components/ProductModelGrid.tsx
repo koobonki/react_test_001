@@ -1,18 +1,14 @@
 /**
  * 품목 AG Grid 컴포넌트.
- *
- * ag-grid-react 라이브러리로 테이블(그리드) UI를 렌더링합니다.
- * - showProductColumn=true: 전체 조회 시 "상품명" 컬럼 추가
- * - 행 클릭 → onSelect → App에서 Modal 오픈
+ * 행 더블클릭 → 품목 상세 페이지로 이동합니다.
  */
 import { useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, RowClickedEvent } from 'ag-grid-community';
+import type { ColDef, RowDoubleClickedEvent } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import type { ProductModel } from '../api';
 
-/** 그리드 한 행 타입 (상품명 표시용 productName 필드 추가) */
 export type ProductModelRow = ProductModel & {
   productName?: string;
 };
@@ -23,7 +19,7 @@ type ProductModelGridProps = {
   highlightedModelId: number | null;
   loading: boolean;
   showProductColumn?: boolean;
-  onSelect: (model: ProductModel) => void;
+  onOpenDetail: (model: ProductModel) => void;
 };
 
 export function ProductModelGrid({
@@ -32,9 +28,8 @@ export function ProductModelGrid({
   highlightedModelId,
   loading,
   showProductColumn = false,
-  onSelect,
+  onOpenDetail,
 }: ProductModelGridProps) {
-  // columnDefs: AG Grid 컬럼 정의 (헤더명, 너비, 포맷 등)
   const columnDefs = useMemo<ColDef<ProductModelRow>[]>(() => {
     const cols: ColDef<ProductModelRow>[] = [
       { field: 'id', headerName: 'ID', width: 80 },
@@ -60,14 +55,14 @@ export function ProductModelGrid({
     return cols;
   }, [showProductColumn]);
 
-  const onRowClicked = (event: RowClickedEvent<ProductModelRow>) => {
-    if (event.data) onSelect(event.data);
+  const onRowDoubleClicked = (event: RowDoubleClickedEvent<ProductModelRow>) => {
+    if (event.data) onOpenDetail(event.data);
   };
 
   return (
     <div className="model-panel">
       <h2 className="model-panel-title">{title} · 품목 목록 (AG Grid)</h2>
-      <p className="model-panel-hint">행을 클릭하면 품목 상세 Modal이 열립니다.</p>
+      <p className="model-panel-hint">행을 더블클릭하면 품목 상세 화면이 열립니다.</p>
       <div className="model-grid-wrapper ag-theme-quartz">
         {loading && (
           <div className="model-grid-loading">품목을 불러오는 중...</div>
@@ -75,7 +70,7 @@ export function ProductModelGrid({
         <AgGridReact<ProductModelRow>
           rowData={models}
           columnDefs={columnDefs}
-          onRowClicked={onRowClicked}
+          onRowDoubleClicked={onRowDoubleClicked}
           rowSelection="single"
           domLayout="autoHeight"
           animateRows

@@ -13,6 +13,7 @@
 export interface Product {
   id?: number;
   name: string;
+  menuCode?: string;
   category: string;
   price: number;
   stock: number;
@@ -32,6 +33,23 @@ export interface ProductModel {
 export type ProductPayload = Omit<Product, 'id'>;
 /** POST/PUT 시 id, productId 없이 보내는 품목 데이터 */
 export type ProductModelPayload = Omit<ProductModel, 'id' | 'productId'>;
+
+/** 자재 1건의 타입 */
+export interface Material {
+  id?: number;
+  materialCode: string;
+  materialName: string;
+  category: string;
+  unit: string;
+  supplier: string;
+  status: string;
+  location: string;
+  stock: number;
+  remark: string;
+}
+
+/** POST/PUT 시 id 없이 보내는 자재 데이터 */
+export type MaterialPayload = Omit<Material, 'id'>;
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -107,6 +125,22 @@ export const productModelsApi = {
   },
   delete(productId: number, id: number): Promise<void> {
     return request(`/api/products/${productId}/models/${id}`, { method: 'DELETE' }, '모델 삭제에 실패했습니다.');
+  },
+};
+
+/** /api/materials CRUD */
+export const materialsApi = {
+  list(): Promise<Material[]> {
+    return request('/api/materials', undefined, '자재 목록을 불러오지 못했습니다.');
+  },
+  get(id: number): Promise<Material> {
+    return request(`/api/materials/${id}`, undefined, '자재를 불러오지 못했습니다.');
+  },
+  create(material: MaterialPayload): Promise<Material> {
+    return request('/api/materials', { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify(material) }, '자재 등록에 실패했습니다.');
+  },
+  update(id: number, material: MaterialPayload): Promise<Material> {
+    return request(`/api/materials/${id}`, { method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(material) }, '자재 수정에 실패했습니다.');
   },
 };
 

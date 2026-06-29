@@ -33,6 +33,9 @@ public class Product {
     /** 재고 수량 */
     private Integer stock;
 
+    /** MegaMenu 연동용 메뉴 코드 */
+    private String menuCode;
+
     /** JPA가 객체를 만들 때 필요한 기본 생성자 */
     public Product() {
     }
@@ -83,5 +86,13 @@ public class Product {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public String getMenuCode() {
+        return menuCode;
+    }
+
+    public void setMenuCode(String menuCode) {
+        this.menuCode = menuCode;
     }
 }
